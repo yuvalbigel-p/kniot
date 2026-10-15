@@ -121,7 +121,7 @@ function AddItemField({ sectionId, onClose }: { sectionId: string; onClose: () =
     <div className="inline-add">
       <div className="field-wrap">
         <input
-          ref={ref} className={`field${err ? ' err' : ''}`} value={val} placeholder="שם הפריט" enterKeyHint="done" aria-label="שם הפריט"
+          ref={ref} className={`field${err ? ' err' : ''}`} value={val} placeholder="פריט חדש" aria-label="פריט חדש"
           onChange={(e) => { setVal(e.target.value); setErr(''); }}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } if (e.key === 'Escape') onClose(); }}
           onBlur={() => { if (!val.trim()) onClose(); }}

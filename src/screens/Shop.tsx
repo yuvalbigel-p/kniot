@@ -108,7 +108,7 @@ export function ShopScreen() {
       </div>
       {reorder ? <div className="cta"><button className="btn primary block big" onClick={() => setReorder(false)}>סיום</button></div> :
       <form className="quick" onSubmit={(e) => { e.preventDefault(); add(); }}>
-        <input className="field" value={val} onChange={(e) => setVal(e.target.value)} placeholder="הוספת פריט לפעם הזו" aria-label="הוספת פריט לפעם הזו" enterKeyHint="done" />
+        <input className="field" value={val} onChange={(e) => setVal(e.target.value)} placeholder="הוספת פריט לפעם הזו" aria-label="הוספת פריט לפעם הזו" />
         <button className="add" type="submit" aria-label="הוספה">+</button>
       </form>}
       <TabBar current="shop" />
