@@ -1,3 +1,4 @@
+import { mirror } from './storage';
 export interface Theme { id: string; name: string; bg: string; card: string; accent: string; ink: string; meta: string }
 
 export const THEMES: Theme[] = [
@@ -23,4 +24,4 @@ export const loadTheme = (): string => {
   try { const v = localStorage.getItem(KEY); if (v && THEMES.some((t) => t.id === v)) return v; } catch { /* ignore */ }
   return 'classic';
 };
-export const saveTheme = (id: string) => { try { localStorage.setItem(KEY, id); } catch { /* ignore */ } };
+export const saveTheme = (id: string) => { try { localStorage.setItem(KEY, id); } catch { /* ignore */ } mirror(KEY, id); };

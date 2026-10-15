@@ -6,6 +6,7 @@ export const KEYS = {
   shop: 'kaniyot.shop.v1',
   ui: 'kaniyot.ui.v1',
   default: 'kaniyot.default.v1',
+  theme: 'kaniyot.theme.v1',
 } as const;
 
 let corruptionSeen = false;
@@ -33,6 +34,63 @@ export function save(key: string, value: unknown) {
     if (value === null) localStorage.removeItem(key);
     else localStorage.setItem(key, JSON.stringify(value));
   } catch { /* storage full / blocked */ }
+  mirror(key, value === null ? null : JSON.stringify(value));
+}
+
+/* ---- durability: IndexedDB mirror + persistent-storage request ----
+   iOS may evict localStorage for sites that aren't installed to the home screen.
+   Every write is mirrored into IndexedDB and restored on boot if localStorage came back empty. */
+const DB = 'kaniyot-mirror';
+const STORE = 'kv';
+
+function openDb(): Promise<IDBDatabase | null> {
+  return new Promise((resolve) => {
+    try {
+      const req = indexedDB.open(DB, 1);
+      req.onupgradeneeded = () => req.result.createObjectStore(STORE);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+    } catch { resolve(null); }
+  });
+}
+
+export function mirror(key: string, raw: string | null) {
+  void openDb().then((db) => {
+    if (!db) return;
+    try {
+      const tx = db.transaction(STORE, 'readwrite');
+      if (raw === null) tx.objectStore(STORE).delete(key); else tx.objectStore(STORE).put(raw, key);
+      tx.oncomplete = () => db.close();
+      tx.onerror = () => db.close();
+    } catch { db.close(); }
+  });
+}
+
+/** Run once before first render: restore anything localStorage lost, then back up what it has. */
+export async function initDurability() {
+  try { await navigator.storage?.persist?.(); } catch { /* ignore */ }
+  const db = await openDb();
+  if (!db) return;
+  const keys = Object.values(KEYS);
+  await Promise.all(keys.map((key) => new Promise<void>((resolve) => {
+    try {
+      const tx = db.transaction(STORE, 'readwrite');
+      const store = tx.objectStore(STORE);
+      const get = store.get(key);
+      get.onsuccess = () => {
+        let local: string | null = null;
+        try { local = localStorage.getItem(key); } catch { /* ignore */ }
+        if (local === null && typeof get.result === 'string') {
+          try { localStorage.setItem(key, get.result); } catch { /* ignore */ }
+        } else if (local !== null && local !== get.result) {
+          store.put(local, key);
+        }
+      };
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+    } catch { resolve(); }
+  })));
+  db.close();
 }
 
 /** State persisted under `key`, written straight after each change. */
