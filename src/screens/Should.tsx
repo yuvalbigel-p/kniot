@@ -14,7 +14,7 @@ type Sheets =
   | null;
 
 export function ShouldScreen() {
-  const { should, setShould, defaultList, saveDefault, showToast, askConfirm, replaceShould } = useStore();
+  const { should, setShould, defaultList, saveDefault, showToast, replaceWithUndo } = useStore();
   const [menu, setMenu] = useState(false);
   const [sheet, setSheet] = useState<Sheets>(null);
   const [adding, setAdding] = useState<string | null>(() =>
@@ -43,10 +43,7 @@ export function ShouldScreen() {
       <Menu open={menu} onClose={() => setMenu(false)}>
         <button role="menuitem" disabled={should.sections.length < 2} onClick={() => setReorder(true)}>סידור קטגוריות</button>
         <button role="menuitem" onClick={() => { saveDefault(should); showToast('נשמר כרשימת ברירת המחדל'); }}>שמירה כברירת מחדל</button>
-        <button role="menuitem" disabled={!defaultList} onClick={() => askConfirm({
-          title: 'להחליף את הרשימה בברירת המחדל?', body: 'השינויים ברשימה הנוכחית יימחקו.', confirmLabel: 'החלפה',
-          onConfirm: () => { replaceShould({ ...defaultList!, updatedAt: new Date().toISOString() }); showToast('נטענה ברירת המחדל'); },
-        })}>טעינת ברירת המחדל</button>
+        <button role="menuitem" disabled={!defaultList} onClick={() => replaceWithUndo({ ...defaultList!, updatedAt: new Date().toISOString() }, 'נטענה ברירת המחדל')}>טעינת ברירת המחדל</button>
       </Menu>
       <div className="scroll">
         {reorder && <p className="reorder-note">הסדר משותף לרשימת הקניות. לחצו ״סיום״ כשמסיימים.</p>}

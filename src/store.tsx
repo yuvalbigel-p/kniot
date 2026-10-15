@@ -14,6 +14,8 @@ interface Store {
   setShould: (s: ShouldList | null | ((p: ShouldList | null) => ShouldList | null)) => void;
   /** Replace the should list (import) and drop counts for items that no longer exist. */
   replaceShould: (s: ShouldList) => void;
+  /** Replace the list with no confirm; shows a toast with undo that restores list and counts. */
+  replaceWithUndo: (s: ShouldList, msg: string) => void;
   defaultList: ShouldList | null;
   saveDefault: (s: ShouldList) => void;
   counts: Counts;
@@ -74,11 +76,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCounts((c) => pruneCounts(c, s));
   }, [setShould, setCounts]);
 
+  const countsRef = useRef(counts);
+  countsRef.current = counts;
+  const replaceWithUndo = useCallback((s: ShouldList, msg: string) => {
+    const prevShould = shouldRef.current;
+    const prevCounts = countsRef.current;
+    replaceShould(s);
+    if (prevShould) showToast(msg, { label: 'ביטול', run: () => { setShould(prevShould); setCounts(prevCounts); } });
+    else showToast(msg);
+  }, [replaceShould, setShould, setCounts, showToast]);
+
   const value = useMemo<Store>(() => ({
-    should, setShould, replaceShould, defaultList, saveDefault: (l) => setDefaultList(l), counts, setCounts, shop, setShop,
+    should, setShould, replaceShould, replaceWithUndo, defaultList, saveDefault: (l) => setDefaultList(l), counts, setCounts, shop, setShop,
     lastTab: ui.lastTab, setLastTab: (t) => setUi({ lastTab: t }),
     toast, showToast, dismissToast, confirm, askConfirm,
-  }), [should, setShould, replaceShould, defaultList, setDefaultList, counts, setCounts, shop, setShop, ui.lastTab, setUi, toast, showToast, dismissToast, confirm]);
+  }), [should, setShould, replaceShould, replaceWithUndo, defaultList, setDefaultList, counts, setCounts, shop, setShop, ui.lastTab, setUi, toast, showToast, dismissToast, confirm]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

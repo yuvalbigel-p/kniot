@@ -8,16 +8,14 @@ import { PasteSheet } from './Share';
 import { THEMES, applyTheme, loadTheme, saveTheme } from '../theme';
 
 export function WelcomeScreen() {
-  const { should, setShould, replaceShould, defaultList, lastTab, askConfirm, showToast } = useStore();
+  const { should, setShould, replaceWithUndo, defaultList, lastTab, showToast } = useStore();
   const [paste, setPaste] = useState(false);
   const [theme, setTheme] = useState(loadTheme);
   const [skinsOpen, setSkinsOpen] = useState(false);
 
-  const apply = (s: ShouldList, msg?: string) => {
-    const run = () => { should ? replaceShould(s) : setShould(s); if (msg) showToast(msg); go('should', true); };
-    if (should) {
-      askConfirm({ title: 'להחליף את הרשימה הנוכחית?', body: 'השינויים ברשימה הנוכחית יימחקו.', confirmLabel: 'החלפה', onConfirm: run });
-    } else run();
+  const apply = (s: ShouldList, msg: string) => {
+    if (should) replaceWithUndo(s, msg); else { setShould(s); showToast(msg); }
+    go('should', true);
   };
   const fresh = (s: ShouldList): ShouldList => ({ ...s, updatedAt: new Date().toISOString() });
   const pick = (id: string) => { setTheme(applyTheme(id)); saveTheme(id); };
@@ -44,7 +42,7 @@ export function WelcomeScreen() {
             <b>רשימת ברירת מחדל</b>
             <span>{defaultList ? `הרשימה ששמרתם: ${defaultList.items.length} פריטים ב־${defaultList.sections.length} קטגוריות.` : '5 קטגוריות ו־20 פריטים בסיסיים. אפשר לערוך ולשמור כברירת מחדל.'}</span>
           </button>
-          <button className="choice" onClick={() => apply(quickStartShould())}><b>רשימה ריקה</b><span>קטגוריה אחת מוכנה, מתחילים להוסיף פריטים מיד.</span></button>
+          <button className="choice" onClick={() => apply(quickStartShould(), 'נפתחה רשימה ריקה')}><b>רשימה ריקה</b><span>קטגוריה אחת מוכנה, מתחילים להוסיף פריטים מיד.</span></button>
           <button className="choice" onClick={() => setPaste(true)}><b>ייבוא קישור</b><span>קיבלתם רשימה? העתיקו את הקישור ולחצו כאן.</span></button>
         </div>
         <div className="skins">
