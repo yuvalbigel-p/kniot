@@ -153,3 +153,12 @@ export const HomeButton = () => (
     <Svg size={20}><path d="M4 11l8-7 8 7" /><path d="M6 10v10h12V10" /><path d="M10 20v-5h4v5" /></Svg>
   </a>
 );
+
+export function MoveButtons({ onUp, onDown, label }: { onUp?: () => void; onDown?: () => void; label: string }) {
+  return (
+    <span className="move">
+      <button className="icon-btn" disabled={!onUp} onClick={onUp} aria-label={`הזזת ${label} למעלה`}><Svg size={20} sw={2.2}><path d="M6 15l6-6 6 6" /></Svg></button>
+      <button className="icon-btn" disabled={!onDown} onClick={onDown} aria-label={`הזזת ${label} למטה`}><Svg size={20} sw={2.2}><path d="M6 9l6 6 6-6" /></Svg></button>
+    </span>
+  );
+}

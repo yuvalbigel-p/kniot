@@ -4,7 +4,7 @@ import { go } from '../route';
 import type { IconId, Item, Section, ShouldList } from '../logic/types';
 import * as S from '../logic/should';
 import { ICONS, iconColors } from '../logic/icons';
-import { HomeButton, IconChip, Menu, Sheet, ShareIcon, Stepper, Steps, Svg, TabBar, useFocusOnMount } from '../components';
+import { HomeButton, IconChip, Menu, MoveButtons, Sheet, ShareIcon, Stepper, Steps, Svg, TabBar, useFocusOnMount } from '../components';
 import { ShareSheet } from './Share';
 
 type Sheets =
@@ -17,7 +17,9 @@ export function ShouldScreen() {
   const { should, setShould, defaultList, saveDefault, showToast, askConfirm, replaceShould } = useStore();
   const [menu, setMenu] = useState(false);
   const [sheet, setSheet] = useState<Sheets>(null);
-  const [adding, setAdding] = useState<string | null>(null);
+  const [adding, setAdding] = useState<string | null>(() =>
+    should && should.items.length === 0 && should.sections.length === 1 ? should.sections[0].id : null);
+  const [reorder, setReorder] = useState(false);
   if (!should) return null;
   const edit = (fn: (s: ShouldList) => ShouldList) => setShould((p) => (p ? fn(p) : p));
 
@@ -39,6 +41,7 @@ export function ShouldScreen() {
         <Steps step={1} />
       </header>
       <Menu open={menu} onClose={() => setMenu(false)}>
+        <button role="menuitem" disabled={should.sections.length < 2} onClick={() => setReorder(true)}>סידור קטגוריות</button>
         <button role="menuitem" onClick={() => { saveDefault(should); showToast('נשמר כרשימת ברירת המחדל'); }}>שמירה כברירת מחדל</button>
         <button role="menuitem" disabled={!defaultList} onClick={() => askConfirm({
           title: 'להחליף את הרשימה בברירת המחדל?', body: 'השינויים ברשימה הנוכחית יימחקו.', confirmLabel: 'החלפה',
@@ -46,25 +49,34 @@ export function ShouldScreen() {
         })}>טעינת ברירת המחדל</button>
       </Menu>
       <div className="scroll">
-        {should.sections.map((sec) => {
+        {reorder && <p className="reorder-note">הסדר משותף לרשימת הקניות. לחצו ״סיום״ כשמסיימים.</p>}
+        {should.sections.map((sec, idx) => {
           const items = S.itemsOf(should, sec.id);
           return (
             <section className="card" key={sec.id} aria-label={sec.name}>
               <div className="card-head">
                 <IconChip icon={sec.icon} />
                 <span className="name">{sec.name}</span>
-                <span className="count">{items.length === 1 ? 'פריט אחד' : `${items.length} פריטים`}</span>
-                <button className="icon-btn" aria-label={`עריכת קטגוריה ${sec.name}`} onClick={() => setSheet({ kind: 'section', id: sec.id })} style={{ marginInline: -8 }}>
-                  <Svg size={20}><circle cx="5" cy="12" r="1.4" fill="currentColor" /><circle cx="12" cy="12" r="1.4" fill="currentColor" /><circle cx="19" cy="12" r="1.4" fill="currentColor" /></Svg>
-                </button>
+                {reorder ? (
+                  <MoveButtons label={sec.name}
+                    onUp={idx > 0 ? () => edit((x) => S.swapSections(x, sec.id, should.sections[idx - 1].id)) : undefined}
+                    onDown={idx < should.sections.length - 1 ? () => edit((x) => S.swapSections(x, sec.id, should.sections[idx + 1].id)) : undefined} />
+                ) : (
+                  <>
+                    <span className="count">{items.length === 1 ? 'פריט אחד' : `${items.length} פריטים`}</span>
+                    <button className="icon-btn" aria-label={`עריכת קטגוריה ${sec.name}`} onClick={() => setSheet({ kind: 'section', id: sec.id })} style={{ marginInline: -8 }}>
+                      <Svg size={20}><circle cx="5" cy="12" r="1.4" fill="currentColor" /><circle cx="12" cy="12" r="1.4" fill="currentColor" /><circle cx="19" cy="12" r="1.4" fill="currentColor" /></Svg>
+                    </button>
+                  </>
+                )}
               </div>
-              {items.map((it) => (
+              {!reorder && items.map((it) => (
                 <div className="row" key={it.id}>
                   <button className="rname" onClick={() => setSheet({ kind: 'item', id: it.id })}>{it.name}</button>
                   <Stepper value={it.target} min={1} label={`כמות רצויה ${it.name}`} onChange={(n) => edit((s) => S.setTarget(s, it.id, n))} />
                 </div>
               ))}
-              {adding === sec.id ? (
+              {reorder ? null : adding === sec.id ? (
                 <AddItemField sectionId={sec.id} onClose={() => setAdding(null)} />
               ) : (
                 <button className="add-item" onClick={() => setAdding(sec.id)}>+ הוספת פריט</button>
@@ -75,13 +87,14 @@ export function ShouldScreen() {
         {should.sections.length === 0 && (
           <div className="empty"><h2>אין עדיין קטגוריות</h2><p>הוסיפו קטגוריה כדי להתחיל.</p></div>
         )}
-        <button className="add-section" onClick={() => setSheet({ kind: 'section', id: null })}>+ קטגוריה חדשה</button>
+        {!reorder && <button className="add-section" onClick={() => setSheet({ kind: 'section', id: null })}>+ קטגוריה חדשה</button>}
       </div>
       <div className="cta">
+        {reorder ? <button className="btn primary block big" onClick={() => setReorder(false)}>סיום</button> :
         <button className="btn primary block big" onClick={() => go('check')}>
           <span className="col">המשך לספירת המלאי<small>שלב הבא: מה יש בבית</small></span>
           <Svg size={20}><path d="M19 12H5M11 6l-6 6 6 6" /></Svg>
-        </button>
+        </button>}
       </div>
       <TabBar current="should" />
       {sheet?.kind === 'share' && <ShareSheet onClose={() => setSheet(null)} />}

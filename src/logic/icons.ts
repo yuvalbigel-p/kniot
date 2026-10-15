@@ -1,12 +1,12 @@
 import type { IconId } from './types';
 
 export const HUES = {
-  olive: ['#7D9459', '#EEF1E6'],
-  blue: ['#5C87A0', '#E9EFF2'],
-  mustard: ['#B9872E', '#F5EEDD'],
-  terra: ['#C1693C', '#F6E6DB'],
-  plum: ['#8E6A86', '#F1EAF0'],
-  taupe: ['#857A68', '#EEEAE2'],
+  olive: ['var(--h-olive)', 'var(--h-olive-bg)'],
+  blue: ['var(--h-blue)', 'var(--h-blue-bg)'],
+  mustard: ['var(--h-mustard)', 'var(--h-mustard-bg)'],
+  terra: ['var(--h-terra)', 'var(--h-terra-bg)'],
+  plum: ['var(--h-plum)', 'var(--h-plum-bg)'],
+  taupe: ['var(--h-taupe)', 'var(--h-taupe-bg)'],
 } as const;
 
 interface IconDef { id: IconId; label: string; hue: keyof typeof HUES; d: string }
