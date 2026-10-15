@@ -162,3 +162,10 @@ export function MoveButtons({ onUp, onDown, label }: { onUp?: () => void; onDown
     </span>
   );
 }
+
+/** Back arrow at the start (right in RTL) of a screen header. */
+export const BackButton = ({ to, label }: { to: string; label: string }) => (
+  <a className="icon-btn back" href={`#/${to}`} aria-label={label}>
+    <Svg size={22} sw={2}><path d="M9 6l6 6-6 6" /></Svg>
+  </a>
+);

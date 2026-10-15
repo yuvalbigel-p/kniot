@@ -289,3 +289,7 @@ textarea.field { block-size: 96px; padding-block: 12px; resize: none; direction:
   --h-olive: #8A9A5B; --h-olive-bg: #EEF0DC; --h-blue: #6C8EAD; --h-blue-bg: #E3EBF3; --h-mustard: #C48A2C; --h-mustard-bg: #F8EBD0;
   --h-terra: #D9776B; --h-terra-bg: #FBDDD6; --h-plum: #9B6B9E; --h-plum-bg: #F0E1F0; --h-taupe: #9A7F7A; --h-taupe-bg: #EFE5E2;
 }
+
+.head-start { display: flex; align-items: center; gap: 4px; }
+.icon-btn.back { margin-inline: -12px 0; color: var(--ink); }
+.continue { display: inline-flex; align-items: center; gap: 6px; align-self: center; text-decoration: none; }

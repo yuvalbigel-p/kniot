@@ -2,7 +2,7 @@ import { useStore } from '../store';
 import { gap } from '../logic/gap';
 import { clampCount, itemsOf } from '../logic/should';
 import { countGaps, exportList, needsExportConfirm, unchecked } from '../logic/shopping';
-import { HomeButton, IconChip, Stepper, Steps, Svg, TabBar } from '../components';
+import { BackButton, IconChip, Stepper, Steps, Svg, TabBar } from '../components';
 import { go } from '../route';
 
 export function CheckScreen() {
@@ -32,8 +32,8 @@ export function CheckScreen() {
     <div className="screen">
       <header className="head">
         <div className="head-top">
-          <span className="eyebrow">קניות</span>
-          <div className="head-actions"><button className="text-btn" onClick={reset}>איפוס ספירה</button><HomeButton /></div>
+          <div className="head-start"><BackButton to="should" label="חזרה למה צריך" /><span className="eyebrow">קניות</span></div>
+          <button className="text-btn" onClick={reset}>איפוס ספירה</button>
         </div>
         <h1 className="title">מה יש</h1>
         <p className="sub">סמנו כמה יש מכל פריט בבית עכשיו</p>
