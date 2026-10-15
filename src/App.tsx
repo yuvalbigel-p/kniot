@@ -8,6 +8,13 @@ import { ShopScreen } from './screens/Shop';
 import { WelcomeScreen } from './screens/Welcome';
 import { ImportScreen } from './screens/Share';
 
+const ACTIVE_KEY = 'kaniyot.active.v1';
+const RESUME_MS = 30 * 60 * 1000;
+const readActive = () => { try { return Number(localStorage.getItem(ACTIVE_KEY)) || 0; } catch { return 0; } };
+const touchActive = () => { try { localStorage.setItem(ACTIVE_KEY, String(Date.now())); } catch { /* ignore */ } };
+/** Decided once per launch: was the app used in the last 30 minutes? */
+const RESUME = Date.now() - readActive() < RESUME_MS;
+
 function Shell() {
   const { should, lastTab, setLastTab } = useStore();
   const route = useRoute();
@@ -16,7 +23,7 @@ function Shell() {
   useEffect(() => {
     if (route.name === 'import') return;
     if (!should) { if (route.name !== 'welcome' || !hasRoute(location.hash)) go('welcome', true); return; }
-    if (!hasRoute(location.hash)) go(lastTab, true);
+    if (!hasRoute(location.hash)) go(RESUME ? lastTab : 'welcome', true);
   }, [route.name, should, lastTab]);
 
   useEffect(() => {
@@ -24,6 +31,17 @@ function Shell() {
       if (route.name !== lastTab) setLastTab(route.name);
     }
   }, [route.name, lastTab, setLastTab]);
+
+  // keep the "last used" stamp fresh while the app is open
+  useEffect(() => {
+    touchActive();
+    const t = window.setInterval(touchActive, 60_000);
+    const hide = () => touchActive();
+    document.addEventListener('visibilitychange', hide);
+    window.addEventListener('pagehide', hide);
+    return () => { window.clearInterval(t); document.removeEventListener('visibilitychange', hide); window.removeEventListener('pagehide', hide); };
+  }, []);
+  useEffect(() => { touchActive(); }, [route.name]);
 
   let screen;
   if (route.name === 'import') screen = <ImportScreen />;
