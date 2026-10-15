@@ -41,7 +41,11 @@ button, input { font: inherit; color: inherit; }
 button { cursor: pointer; }
 h1, h2, h3, p { margin: 0; }
 
-.app { height: 100%; max-inline-size: 480px; margin-inline: auto; display: flex; flex-direction: column; position: relative; overflow: hidden; background: var(--cream); }
+.app { position: fixed; inset-block-start: 0; inset-inline: 0; block-size: var(--vvh, 100%); transform: translateY(var(--vvt, 0px)); max-inline-size: 480px; margin-inline: auto; display: flex; flex-direction: column; overflow: hidden; background: var(--cream); }
+html, body { overflow: hidden; position: fixed; inset: 0; inline-size: 100%; }
+/* keyboard open: free the space for the field */
+.kb .tabbar, .kb .cta { display: none; }
+.kb .head { padding-block-start: calc(10px + var(--safe-t)); }
 @media (min-width: 481px) { body { background: var(--page-bg); } .app { box-shadow: 0 0 0 1px var(--line); } }
 
 .screen { flex: 1; display: flex; flex-direction: column; min-block-size: 0; }

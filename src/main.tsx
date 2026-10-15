@@ -8,6 +8,23 @@ import './styles.css';
 
 registerSW({ immediate: true });
 
+// iOS pans the page when the keyboard opens, pushing the header under the status bar.
+// Keep the app glued to the *visible* viewport instead.
+const vv = window.visualViewport;
+if (vv) {
+  const root = document.documentElement;
+  const sync = () => {
+    root.style.setProperty('--vvh', `${vv.height}px`);
+    root.style.setProperty('--vvt', `${vv.offsetTop}px`);
+    root.classList.toggle('kb', window.innerHeight - vv.height > 120);
+    if (window.scrollY || window.scrollX) window.scrollTo(0, 0);
+  };
+  vv.addEventListener('resize', sync);
+  vv.addEventListener('scroll', sync);
+  window.addEventListener('scroll', sync);
+  sync();
+}
+
 // Keep the iOS keyboard light: no contact AutoFill, no autocorrect/capitalize, plain gray return key.
 const calm = (el: Element) => {
   if (!(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) return;
