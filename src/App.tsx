@@ -8,12 +8,16 @@ import { ShopScreen } from './screens/Shop';
 import { WelcomeScreen } from './screens/Welcome';
 import { ImportScreen } from './screens/Share';
 
-const ACTIVE_KEY = 'kaniyot.active.v1';
-const RESUME_MS = 30 * 60 * 1000;
-const readActive = () => { try { return Number(localStorage.getItem(ACTIVE_KEY)) || 0; } catch { return 0; } };
-const touchActive = () => { try { localStorage.setItem(ACTIVE_KEY, String(Date.now())); } catch { /* ignore */ } };
-/** Decided once per launch: was the app used in the last 30 minutes? */
-const RESUME = Date.now() - readActive() < RESUME_MS;
+/* Launch logic: swiping the app away ends its session (sessionStorage is cleared) -> open on home.
+   Switching to another app and back keeps the session alive -> stay on the same screen. */
+const SESSION_KEY = 'kaniyot.session';
+const RESUME = (() => {
+  try {
+    const alive = sessionStorage.getItem(SESSION_KEY) === '1';
+    sessionStorage.setItem(SESSION_KEY, '1');
+    return alive;
+  } catch { return false; }
+})();
 
 function Shell() {
   const { should, lastTab, setLastTab } = useStore();
@@ -31,17 +35,6 @@ function Shell() {
       if (route.name !== lastTab) setLastTab(route.name);
     }
   }, [route.name, lastTab, setLastTab]);
-
-  // keep the "last used" stamp fresh while the app is open
-  useEffect(() => {
-    touchActive();
-    const t = window.setInterval(touchActive, 60_000);
-    const hide = () => touchActive();
-    document.addEventListener('visibilitychange', hide);
-    window.addEventListener('pagehide', hide);
-    return () => { window.clearInterval(t); document.removeEventListener('visibilitychange', hide); window.removeEventListener('pagehide', hide); };
-  }, []);
-  useEffect(() => { touchActive(); }, [route.name]);
 
   let screen;
   if (route.name === 'import') screen = <ImportScreen />;
