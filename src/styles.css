@@ -240,9 +240,9 @@ textarea.field { block-size: 96px; padding-block: 12px; resize: none; direction:
 
 :root[data-theme='modern'] {
   --cream: #F3F4F6; --card: #FFFFFF; --ink: #111827; --ink-soft: #6B7280; --line: #E5E7EB;
-  --accent: #4F46E5; --accent-strong: #4338CA; --ok: #047857; --accent-bg: #E8E8FD; --ok-bg: #DCF3EA;
-  --warn: #92400E; --warn-bg: #FEF3C7; --on-accent: #FFFFFF; --on-accent-soft: #DDD9FF; --page-bg: #E5E7EB;
-  --toast-bg: #111827; --toast-fg: #FFFFFF; --toast-act: #A5B4FC; --hint-bg: #E8EAEE; --hint-fg: #4B5563;
+  --accent: #6246EA; --accent-strong: #5538D6; --ok: #047857; --accent-bg: #EDE8FD; --ok-bg: #DCF3EA;
+  --warn: #92400E; --warn-bg: #FEF3C7; --on-accent: #FFFFFF; --on-accent-soft: #E3DCFF; --page-bg: #E5E7EB;
+  --toast-bg: #111827; --toast-fg: #FFFFFF; --toast-act: #BCAEFF; --hint-bg: #E8EAEE; --hint-fg: #4B5563;
   --r-card: 14px; --r-ctl: 12px; --r-field: 10px; --title-weight: 800;
   --serif: 'Heebo', 'Rubik', sans-serif; --sans: 'Heebo', 'Rubik', system-ui, sans-serif;
   --h-olive: #059669; --h-olive-bg: #DCF3EA; --h-blue: #2563EB; --h-blue-bg: #E0EAFD; --h-mustard: #B45309; --h-mustard-bg: #FDEFD5;

@@ -3,7 +3,7 @@ export interface Theme { id: string; name: string; bg: string; card: string; acc
 
 export const THEMES: Theme[] = [
   { id: 'classic', name: 'קלאסי', bg: '#FAF4E9', card: '#FFFFFF', accent: '#C1693C', ink: '#2E2620', meta: '#FAF4E9' },
-  { id: 'modern', name: 'מודרני', bg: '#F3F4F6', card: '#FFFFFF', accent: '#4F46E5', ink: '#111827', meta: '#F3F4F6' },
+  { id: 'modern', name: 'מודרני', bg: '#F3F4F6', card: '#FFFFFF', accent: '#6246EA', ink: '#111827', meta: '#F3F4F6' },
   { id: 'night', name: 'לילה', bg: '#0E1116', card: '#171B22', accent: '#FF8A65', ink: '#E8EAED', meta: '#0E1116' },
   { id: 'funky', name: 'פאנקי', bg: '#FFE14D', card: '#FFFFFF', accent: '#FF4F9A', ink: '#1A1033', meta: '#FFE14D' },
   { id: 'sea', name: 'ים', bg: '#EAF1EE', card: '#FAFCFB', accent: '#2F7F8F', ink: '#22332E', meta: '#EAF1EE' },
