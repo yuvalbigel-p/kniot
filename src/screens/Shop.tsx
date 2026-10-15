@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../store';
 import { addOneOff, groupLines, progress } from '../logic/shopping';
-import { BackButton, IconChip, Menu, MoveButtons, Sheet, Stepper, Steps, Svg, TabBar } from '../components';
+import { BackButton, HomeButton, IconChip, Menu, MoveButtons, Sheet, Stepper, Steps, Svg, TabBar } from '../components';
 import { addItem, checkItemName, swapSections } from '../logic/should';
 import type { ShoppingLine } from '../logic/types';
 
@@ -44,7 +44,7 @@ export function ShopScreen() {
       <header className="head">
         <div className="head-top">
           <div className="head-start"><BackButton to="check" label="חזרה למה יש" /><span className="eyebrow">קניות</span></div>
-          <div className="head-actions">
+          <div className="head-actions"><HomeButton />
           <button className="icon-btn" aria-label="עוד פעולות" aria-haspopup="menu" onClick={() => setMenu(true)}>
             <Svg size={20}><circle cx="5" cy="12" r="1.4" fill="currentColor" /><circle cx="12" cy="12" r="1.4" fill="currentColor" /><circle cx="19" cy="12" r="1.4" fill="currentColor" /></Svg>
           </button></div>

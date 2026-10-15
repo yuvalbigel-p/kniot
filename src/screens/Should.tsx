@@ -4,7 +4,7 @@ import { go } from '../route';
 import type { IconId, Item, Section, ShouldList } from '../logic/types';
 import * as S from '../logic/should';
 import { ICONS, iconColors } from '../logic/icons';
-import { BackButton, IconChip, Menu, MoveButtons, Sheet, ShareIcon, Stepper, Steps, Svg, TabBar, useFocusOnMount } from '../components';
+import { BackButton, HomeButton, IconChip, Menu, MoveButtons, Sheet, ShareIcon, Stepper, Steps, Svg, TabBar, useFocusOnMount } from '../components';
 import { ShareSheet } from './Share';
 
 type Sheets =
@@ -29,6 +29,7 @@ export function ShouldScreen() {
         <div className="head-top">
           <div className="head-start"><BackButton to="welcome" label="חזרה למסך הבית" /><span className="eyebrow">קניות</span></div>
           <div className="head-actions">
+            <HomeButton />
             <button className="icon-btn" aria-label="שיתוף הרשימה" onClick={() => setSheet({ kind: 'share' })}><ShareIcon size={18} /></button>
             <button className="icon-btn" aria-label="עוד פעולות" aria-haspopup="menu" onClick={() => setMenu(true)}>
               <Svg size={20}><circle cx="5" cy="12" r="1.4" fill="currentColor" /><circle cx="12" cy="12" r="1.4" fill="currentColor" /><circle cx="19" cy="12" r="1.4" fill="currentColor" /></Svg>
