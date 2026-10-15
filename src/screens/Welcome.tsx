@@ -1,14 +1,24 @@
 import { useState } from 'react';
 import { useStore } from '../store';
 import { emptyShould, starterShould } from '../logic/starter';
-import { go, isIOSBrowser } from '../route';
-import { ShareIcon } from '../components';
+import type { ShouldList } from '../logic/types';
+import { go, isIOSBrowser, useRoute } from '../route';
+import { ShareIcon, Svg } from '../components';
 import { PasteSheet } from './Share';
 
 export function WelcomeScreen() {
-  const { setShould } = useStore();
+  const { should, setShould, replaceShould, defaultList, lastTab, askConfirm, showToast } = useStore();
   const [paste, setPaste] = useState(false);
-  const start = (s: ReturnType<typeof starterShould>) => { setShould(s); go('should', true); };
+  useRoute();
+
+  const apply = (s: ShouldList, msg?: string) => {
+    const run = () => { should ? replaceShould(s) : setShould(s); if (msg) showToast(msg); go('should', true); };
+    if (should) {
+      askConfirm({ title: 'להחליף את הרשימה הנוכחית?', body: 'השינויים ברשימה הנוכחית יימחקו.', confirmLabel: 'החלפה', onConfirm: run });
+    } else run();
+  };
+  const fresh = (s: ShouldList): ShouldList => ({ ...s, updatedAt: new Date().toISOString() });
+
   return (
     <div className="screen">
       <div className="center">
@@ -20,10 +30,20 @@ export function WelcomeScreen() {
           <p>מה צריך, מה יש, ומה לקנות.</p>
         </div>
         <div className="stack" style={{ gap: 12 }}>
-          <button className="choice primary" onClick={() => start(starterShould())}>
+          {should && (
+            <button className="choice primary" onClick={() => go(lastTab)}>
+              <b>המשך לרשימה שלי</b><span>{should.items.length} פריטים ב־{should.sections.length} קטגוריות</span>
+            </button>
+          )}
+          {defaultList && (
+            <button className={`choice${should ? '' : ' primary'}`} onClick={() => apply(fresh(defaultList), 'נטענה ברירת המחדל')}>
+              <b>להתחיל מרשימת ברירת המחדל שלי</b><span>{defaultList.items.length} פריטים ב־{defaultList.sections.length} קטגוריות, כפי ששמרתם.</span>
+            </button>
+          )}
+          <button className={`choice${!should && !defaultList ? ' primary' : ''}`} onClick={() => apply(starterShould())}>
             <b>להתחיל מרשימה מוכנה</b><span>5 קטגוריות ו־20 פריטים בסיסיים. אפשר לערוך הכל אחר כך.</span>
           </button>
-          <button className="choice" onClick={() => start(emptyShould())}><b>רשימה ריקה</b><span>בונים הכל מאפס.</span></button>
+          <button className="choice" onClick={() => apply(emptyShould())}><b>רשימה ריקה</b><span>בונים הכל מאפס.</span></button>
           <button className="choice" onClick={() => setPaste(true)}><b>ייבוא מקישור</b><span>קיבלתם רשימה? העתיקו את הקישור ולחצו כאן.</span></button>
         </div>
         {isIOSBrowser() && (

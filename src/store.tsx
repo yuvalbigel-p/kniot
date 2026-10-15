@@ -14,6 +14,8 @@ interface Store {
   setShould: (s: ShouldList | null | ((p: ShouldList | null) => ShouldList | null)) => void;
   /** Replace the should list (import) and drop counts for items that no longer exist. */
   replaceShould: (s: ShouldList) => void;
+  defaultList: ShouldList | null;
+  saveDefault: (s: ShouldList) => void;
   counts: Counts;
   setCounts: (c: Counts | ((p: Counts) => Counts)) => void;
   shop: ShoppingList;
@@ -49,6 +51,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setShouldRaw(v);
   }, []);
 
+  const [defaultList, setDefaultList] = useStoredState<ShouldList | null>(KEYS.default, () => null, nullable);
   const [counts, setCounts] = useStoredState<Counts>(KEYS.counts, () => ({}), isCounts);
   const [shop, setShop] = useStoredState<ShoppingList>(KEYS.shop, emptyShop, isShoppingList);
   const [ui, setUi] = useStoredState<UiState>(KEYS.ui, () => ({ lastTab: 'should' }), isUiState);
@@ -72,10 +75,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [setShould, setCounts]);
 
   const value = useMemo<Store>(() => ({
-    should, setShould, replaceShould, counts, setCounts, shop, setShop,
+    should, setShould, replaceShould, defaultList, saveDefault: (l) => setDefaultList(l), counts, setCounts, shop, setShop,
     lastTab: ui.lastTab, setLastTab: (t) => setUi({ lastTab: t }),
     toast, showToast, dismissToast, confirm, askConfirm,
-  }), [should, setShould, replaceShould, counts, setCounts, shop, setShop, ui.lastTab, setUi, toast, showToast, dismissToast, confirm]);
+  }), [should, setShould, replaceShould, defaultList, setDefaultList, counts, setCounts, shop, setShop, ui.lastTab, setUi, toast, showToast, dismissToast, confirm]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

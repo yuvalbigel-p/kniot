@@ -5,6 +5,7 @@ export const KEYS = {
   counts: 'kaniyot.counts.v1',
   shop: 'kaniyot.shop.v1',
   ui: 'kaniyot.ui.v1',
+  default: 'kaniyot.default.v1',
 } as const;
 
 let corruptionSeen = false;

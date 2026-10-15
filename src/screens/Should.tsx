@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
 import { useStore } from '../store';
+import { go } from '../route';
 import type { IconId, Item, Section, ShouldList } from '../logic/types';
 import * as S from '../logic/should';
 import { ICONS, iconColors } from '../logic/icons';
-import { IconChip, Sheet, ShareIcon, Stepper, Svg, TabBar, useFocusOnMount } from '../components';
+import { HomeButton, IconChip, Menu, Sheet, ShareIcon, Stepper, Steps, Svg, TabBar, useFocusOnMount } from '../components';
 import { ShareSheet } from './Share';
 
 type Sheets =
@@ -13,7 +14,8 @@ type Sheets =
   | null;
 
 export function ShouldScreen() {
-  const { should, setShould } = useStore();
+  const { should, setShould, defaultList, saveDefault, showToast, askConfirm, replaceShould } = useStore();
+  const [menu, setMenu] = useState(false);
   const [sheet, setSheet] = useState<Sheets>(null);
   const [adding, setAdding] = useState<string | null>(null);
   if (!should) return null;
@@ -24,11 +26,25 @@ export function ShouldScreen() {
       <header className="head">
         <div className="head-top">
           <span className="eyebrow">קניות</span>
-          <button className="icon-btn" aria-label="שיתוף הרשימה" onClick={() => setSheet({ kind: 'share' })}><ShareIcon size={18} /></button>
+          <div className="head-actions">
+            <HomeButton />
+            <button className="icon-btn" aria-label="שיתוף הרשימה" onClick={() => setSheet({ kind: 'share' })}><ShareIcon size={18} /></button>
+            <button className="icon-btn" aria-label="עוד פעולות" aria-haspopup="menu" onClick={() => setMenu(true)}>
+              <Svg size={20}><circle cx="5" cy="12" r="1.4" fill="currentColor" /><circle cx="12" cy="12" r="1.4" fill="currentColor" /><circle cx="19" cy="12" r="1.4" fill="currentColor" /></Svg>
+            </button>
+          </div>
         </div>
         <h1 className="title">מה צריך</h1>
         <p className="sub">הבסיס הקבוע שתמיד רוצים בבית</p>
+        <Steps step={1} />
       </header>
+      <Menu open={menu} onClose={() => setMenu(false)}>
+        <button role="menuitem" onClick={() => { saveDefault(should); showToast('נשמר כרשימת ברירת המחדל'); }}>שמירה כברירת מחדל</button>
+        <button role="menuitem" disabled={!defaultList} onClick={() => askConfirm({
+          title: 'להחליף את הרשימה בברירת המחדל?', body: 'השינויים ברשימה הנוכחית יימחקו.', confirmLabel: 'החלפה',
+          onConfirm: () => { replaceShould({ ...defaultList!, updatedAt: new Date().toISOString() }); showToast('נטענה ברירת המחדל'); },
+        })}>טעינת ברירת המחדל</button>
+      </Menu>
       <div className="scroll">
         {should.sections.map((sec) => {
           const items = S.itemsOf(should, sec.id);
@@ -61,6 +77,12 @@ export function ShouldScreen() {
         )}
         <button className="add-section" onClick={() => setSheet({ kind: 'section', id: null })}>+ קטגוריה חדשה</button>
       </div>
+      <div className="cta">
+        <button className="btn primary block big" onClick={() => go('check')}>
+          <span className="col">המשך לספירת המלאי<small>שלב הבא: מה יש בבית</small></span>
+          <Svg size={20}><path d="M19 12H5M11 6l-6 6 6 6" /></Svg>
+        </button>
+      </div>
       <TabBar current="should" />
       {sheet?.kind === 'share' && <ShareSheet onClose={() => setSheet(null)} />}
       {sheet?.kind === 'section' && <SectionSheet id={sheet.id} onClose={() => setSheet(null)} />}
@@ -84,12 +106,18 @@ function AddItemField({ sectionId, onClose }: { sectionId: string; onClose: () =
   };
   return (
     <div className="inline-add">
-      <input
-        ref={ref} className={`field${err ? ' err' : ''}`} value={val} placeholder="שם הפריט" enterKeyHint="done" aria-label="שם הפריט"
-        onChange={(e) => { setVal(e.target.value); setErr(''); }}
-        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } if (e.key === 'Escape') onClose(); }}
-        onBlur={() => { if (!val.trim()) onClose(); }}
-      />
+      <div className="field-wrap">
+        <input
+          ref={ref} className={`field${err ? ' err' : ''}`} value={val} placeholder="שם הפריט" enterKeyHint="done" aria-label="שם הפריט"
+          onChange={(e) => { setVal(e.target.value); setErr(''); }}
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } if (e.key === 'Escape') onClose(); }}
+          onBlur={() => { if (!val.trim()) onClose(); }}
+        />
+        <button type="button" className="field-go" aria-label={val.trim() ? 'הוספת הפריט' : 'סגירה'}
+          onMouseDown={(e) => e.preventDefault()} onClick={submit}>
+          <Svg size={18} sw={2.4}>{val.trim() ? <path d="M5 12.5l4.5 4.5L19 7.5" /> : <path d="M6 6l12 12M18 6L6 18" />}</Svg>
+        </button>
+      </div>
       {err && <div className="err-text" role="alert">{err}</div>}
     </div>
   );

@@ -133,3 +133,23 @@ export function useToggle(initial = false): [boolean, () => void, (v: boolean) =
   const [v, set] = useState(initial);
   return [v, () => set((x) => !x), set];
 }
+
+const STEP_LABELS = ['מה צריך', 'מה יש', 'לקנייה'];
+export function Steps({ step }: { step: 1 | 2 | 3 }) {
+  return (
+    <div className="steps" role="img" aria-label={`שלב ${step} מתוך 3`}>
+      {STEP_LABELS.map((l, i) => (
+        <div key={l} className={`step${i + 1 < step ? ' done' : ''}${i + 1 === step ? ' now' : ''}`}>
+          <i />
+          <span>{i + 1}. {l}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export const HomeButton = () => (
+  <a className="icon-btn" href="#/welcome" aria-label="מסך הבית">
+    <Svg size={20}><path d="M4 11l8-7 8 7" /><path d="M6 10v10h12V10" /><path d="M10 20v-5h4v5" /></Svg>
+  </a>
+);

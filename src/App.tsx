@@ -17,7 +17,6 @@ function Shell() {
     if (route.name === 'import') return;
     if (!should) { if (route.name !== 'welcome' || !hasRoute(location.hash)) go('welcome', true); return; }
     if (!hasRoute(location.hash)) go(lastTab, true);
-    else if (route.name === 'welcome') go(lastTab, true);
   }, [route.name, should, lastTab]);
 
   useEffect(() => {
@@ -28,10 +27,9 @@ function Shell() {
 
   let screen;
   if (route.name === 'import') screen = <ImportScreen />;
-  else if (!should) screen = <WelcomeScreen />;
+  else if (!should || route.name === 'welcome') screen = <WelcomeScreen />;
   else if (route.name === 'check') screen = <CheckScreen />;
   else if (route.name === 'shop') screen = <ShopScreen />;
-  else if (route.name === 'welcome') screen = null;
   else screen = <ShouldScreen />;
 
   return (
