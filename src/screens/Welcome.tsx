@@ -11,6 +11,7 @@ export function WelcomeScreen() {
   const { should, setShould, replaceShould, defaultList, lastTab, askConfirm, showToast } = useStore();
   const [paste, setPaste] = useState(false);
   const [theme, setTheme] = useState(loadTheme);
+  const [skinsOpen, setSkinsOpen] = useState(false);
 
   const apply = (s: ShouldList, msg?: string) => {
     const run = () => { should ? replaceShould(s) : setShould(s); if (msg) showToast(msg); go('should', true); };
@@ -47,19 +48,24 @@ export function WelcomeScreen() {
           <button className="choice" onClick={() => setPaste(true)}><b>ייבוא קישור</b><span>קיבלתם רשימה? העתיקו את הקישור ולחצו כאן.</span></button>
         </div>
         <div className="skins">
-          <h2>עיצוב</h2>
-          <div className="skin-grid">
-            {THEMES.map((t) => (
-              <button key={t.id} className="skin" aria-pressed={theme === t.id} onClick={() => pick(t.id)}>
-                <span className="swatch" style={{ background: t.bg }} aria-hidden="true">
-                  <i style={{ background: t.card, border: `1px solid ${t.ink}33` }} />
-                  <i style={{ background: t.accent }} />
-                  <i className="bar" style={{ background: t.ink }} />
-                </span>
-                {t.name}
-              </button>
-            ))}
-          </div>
+          <button className="link-btn skins-toggle" aria-expanded={skinsOpen} aria-controls="skin-grid" onClick={() => setSkinsOpen((v) => !v)}>
+            <Svg size={18}><circle cx="12" cy="12" r="9" /><circle cx="8.5" cy="10" r="1.2" fill="currentColor" stroke="none" /><circle cx="12" cy="7.5" r="1.2" fill="currentColor" stroke="none" /><circle cx="15.5" cy="10" r="1.2" fill="currentColor" stroke="none" /><path d="M12 21c-1.5 0-2-1.2-1.4-2.4.5-1 0-2.1-1.1-2.1H8a3 3 0 010-6" /></Svg>
+            {skinsOpen ? 'הסתרת עיצובים' : 'שינוי עיצוב'}
+          </button>
+          {skinsOpen && (
+            <div className="skin-grid" id="skin-grid">
+              {THEMES.map((t) => (
+                <button key={t.id} className="skin" aria-pressed={theme === t.id} onClick={() => pick(t.id)}>
+                  <span className="swatch" style={{ background: t.bg }} aria-hidden="true">
+                    <i style={{ background: t.card, border: `1px solid ${t.ink}33` }} />
+                    <i style={{ background: t.accent }} />
+                    <i className="bar" style={{ background: t.ink }} />
+                  </span>
+                  {t.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         {isIOSBrowser() && (
           <div className="hint"><ShareIcon size={18} /><span>להוספה למסך הבית: שיתוף ← הוסף למסך הבית</span></div>
