@@ -14,7 +14,7 @@ interface Store {
   setShould: (s: ShouldList | null | ((p: ShouldList | null) => ShouldList | null)) => void;
   /** Replace the should list (import) and drop counts for items that no longer exist. */
   replaceShould: (s: ShouldList) => void;
-  /** Replace the list with no confirm; shows a toast with undo that restores list and counts. */
+  /** Replace the list with no confirm; shows a plain toast. */
   replaceWithUndo: (s: ShouldList, msg: string) => void;
   defaultList: ShouldList | null;
   saveDefault: (s: ShouldList) => void;
@@ -79,12 +79,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const countsRef = useRef(counts);
   countsRef.current = counts;
   const replaceWithUndo = useCallback((s: ShouldList, msg: string) => {
-    const prevShould = shouldRef.current;
-    const prevCounts = countsRef.current;
     replaceShould(s);
-    if (prevShould) showToast(msg, { label: 'ביטול', run: () => { setShould(prevShould); setCounts(prevCounts); } });
-    else showToast(msg);
-  }, [replaceShould, setShould, setCounts, showToast]);
+    showToast(msg);
+  }, [replaceShould, showToast]);
 
   const value = useMemo<Store>(() => ({
     should, setShould, replaceShould, replaceWithUndo, defaultList, saveDefault: (l) => setDefaultList(l), counts, setCounts, shop, setShop,

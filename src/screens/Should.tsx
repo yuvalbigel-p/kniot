@@ -154,19 +154,10 @@ function ItemSheet({ id, onClose }: { id: string; onClose: () => void }) {
     onClose();
   };
   const remove = () => {
-    const idx = should!.items.findIndex((i) => i.id === id);
     const removed: Item = item;
     setShould((p) => (p ? S.deleteItem(p, id) : p));
     onClose();
-    showToast(`„${removed.name}“ נמחק`, {
-      label: 'ביטול',
-      run: () => setShould((p) => {
-        if (!p || !p.sections.some((s) => s.id === removed.sectionId)) return p;
-        const items = [...p.items];
-        items.splice(Math.min(idx, items.length), 0, removed);
-        return { ...p, items, updatedAt: new Date().toISOString() };
-      }),
-    });
+    showToast(`„${removed.name}“ נמחק`);
   };
   return (
     <Sheet title="עריכת פריט" onClose={onClose}>
