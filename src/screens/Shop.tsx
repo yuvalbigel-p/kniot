@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../store';
 import { addOneOff, groupLines, progress } from '../logic/shopping';
-import { BackButton, HomeButton, IconChip, Menu, DragHandle, Sheet, Stepper, Steps, Svg, TabBar } from '../components';
+import { BackButton, HomeButton, IconChip, Menu, dragProps, Sheet, Stepper, Steps, Svg, TabBar } from '../components';
 import { addItem, checkItemName, moveSectionTo } from '../logic/should';
 import type { ShoppingLine } from '../logic/types';
 
 export function ShopScreen() {
   const { should, setShould, shop, setShop, askConfirm, showToast } = useStore();
-  const [reorder, setReorder] = useState(false);
   const [addTo, setAddTo] = useState<ShoppingLine | null>(null);
   const [menu, setMenu] = useState(false);
   const [val, setVal] = useState('');
@@ -55,7 +54,6 @@ export function ShopScreen() {
         <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done}><div style={{ inlineSize: `${ratio * 100}%` }} /></div>
       </header>
       <Menu open={menu} onClose={() => setMenu(false)}>
-        <button role="menuitem" disabled={groups.filter((g) => g.kind === 'section').length < 2} onClick={() => setReorder(true)}>סידור קטגוריות</button>
         <button role="menuitem" disabled={!shop.lines.some((l) => l.checked)} onClick={clearChecked}>ניקוי מסומנים</button>
         <button role="menuitem" className="danger" disabled={!total} onClick={clearAll}>ניקוי הרשימה</button>
       </Menu>
@@ -67,19 +65,15 @@ export function ShopScreen() {
             <a className="link-btn" href="#/check">למה יש בבית ←</a>
           </div>
         )}
-        {reorder && <p className="reorder-note">גררו את הידית כדי לסדר. הסדר משותף לרשימת ״מה צריך״.</p>}
         {groups.map((g) => {
           const s = g.sectionId ? sec.get(g.sectionId) : undefined;
           return (
-            <section key={g.key} aria-label={g.title} {...(reorder && g.sectionId ? { 'data-drag-id': g.sectionId, 'data-drag-scope': 'sections' } : {})}>
+            <section key={g.key} aria-label={g.title} {...(g.sectionId ? { 'data-drag-id': g.sectionId, 'data-drag-scope': 'sections' } : {})}>
               <div className="group-head">
                 {s ? <IconChip icon={s.icon} small /> : <IconChip icon="other" small />}
-                <span>{g.title}</span>
-                {reorder && g.kind === 'section' && (
-                  <DragHandle id={g.sectionId!} label={g.title} onOver={(a, b) => setShould((p) => (p ? moveSectionTo(p, a, b) : p))} />
-                )}
+                <span {...(g.sectionId ? dragProps(g.sectionId, 'sections', (a, b) => setShould((p) => (p ? moveSectionTo(p, a, b) : p))) : {})}>{g.title}</span>
               </div>
-              {!reorder && <>
+              <>
               {g.lines.map((l) => (
                 <div id={`line-${l.id}`} className={`line${l.checked ? ' done' : ''}${flash === l.id ? ' flash' : ''}`} key={l.id}>
                   <label>
@@ -97,16 +91,15 @@ export function ShopScreen() {
                   )}
                 </div>
               ))}
-              </>}
+              </>
             </section>
           );
         })}
       </div>
-      {reorder ? <div className="cta"><button className="btn primary block big" onClick={() => setReorder(false)}>סיום</button></div> :
       <form className="quick" onSubmit={(e) => { e.preventDefault(); add(); }}>
         <input className="field" value={val} onChange={(e) => setVal(e.target.value)} placeholder="הוספת פריט לפעם הזו" aria-label="הוספת פריט לפעם הזו" />
         <button className="add" type="submit" aria-label="הוספה">+</button>
-      </form>}
+      </form>
       <TabBar current="shop" />
       {addTo && should && (
         <AddToShouldSheet line={addTo} onClose={() => setAddTo(null)} onDone={(sectionId, itemId) => {

@@ -154,50 +154,72 @@ export const HomeButton = () => (
   </a>
 );
 
-/** Grip that drags a `[data-drag-id]` element over its siblings; calls onOver(draggedId, targetId) when it crosses a neighbour's midpoint. */
-export function DragHandle({ id, label, scope = 'sections', onOver }: { id: string; label: string; scope?: string; onOver: (id: string, targetId: string) => void }) {
-  const start = (e: React.PointerEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    const el = (e.currentTarget.closest('[data-drag-id]') as HTMLElement);
-    const scroller = el.closest('.scroll') as HTMLElement | null;
-    el.classList.add('dragging');
-    let y = e.clientY;
-    let raf = 0;
-    const tick = () => {
-      if (scroller) {
-        const r = scroller.getBoundingClientRect();
-        if (y < r.top + 70) scroller.scrollTop -= 12;
-        else if (y > r.bottom - 70) scroller.scrollTop += 12;
+/** Long-press (350ms) on the element's handle, then drag it over its `[data-drag-scope]` siblings; onOver(draggedId, targetId) fires when it crosses a neighbour's midpoint. Spread the result on the handle (e.g. the name). */
+export function dragProps(id: string, scope: string, onOver: (id: string, targetId: string) => void) {
+  return {
+    'data-drag-handle': '',
+    onContextMenu: (e: React.SyntheticEvent) => e.preventDefault(),
+    onPointerDown: (e: React.PointerEvent<HTMLElement>) => {
+      if (e.button !== 0) return;
+      const found = e.currentTarget.closest<HTMLElement>('[data-drag-id]');
+      if (!found) return;
+      const el: HTMLElement = found;
+      const scroller = el.closest('.scroll') as HTMLElement | null;
+      const x0 = e.clientX;
+      let y = e.clientY;
+      const y0 = y;
+      let active = false;
+      let raf = 0;
+      const blockTouch = (ev: TouchEvent) => { if (ev.cancelable) ev.preventDefault(); };
+      const blockClick = (ev: MouseEvent) => { ev.stopPropagation(); ev.preventDefault(); };
+      const tick = () => {
+        if (scroller) {
+          const r = scroller.getBoundingClientRect();
+          if (y < r.top + 70) scroller.scrollTop -= 12;
+          else if (y > r.bottom - 70) scroller.scrollTop += 12;
+        }
+        const cur = el.getBoundingClientRect();
+        const dir = y - (cur.top + cur.height / 2);
+        for (const other of Array.from(document.querySelectorAll<HTMLElement>(`[data-drag-scope="${scope}"]`))) {
+          const oid = other.dataset.dragId!;
+          if (oid === id) continue;
+          const r = other.getBoundingClientRect();
+          const below = r.top > cur.top;
+          if (below ? y > r.top + r.height / 2 : y < r.top + r.height / 2) { if ((below && dir > 0) || (!below && dir < 0)) onOver(id, oid); break; }
+        }
+        raf = requestAnimationFrame(tick);
+      };
+      const timer = window.setTimeout(() => {
+        active = true;
+        el.classList.add('dragging');
+        document.documentElement.classList.add('drag-on');
+        window.addEventListener('touchmove', blockTouch, { passive: false });
+        navigator.vibrate?.(15);
+        raf = requestAnimationFrame(tick);
+      }, 350);
+      const move = (ev: PointerEvent) => {
+        y = ev.clientY;
+        if (!active && Math.hypot(ev.clientX - x0, ev.clientY - y0) > 8) cleanup();
+      };
+      function cleanup() {
+        window.clearTimeout(timer);
+        cancelAnimationFrame(raf);
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', cleanup);
+        window.removeEventListener('pointercancel', cleanup);
+        window.removeEventListener('touchmove', blockTouch);
+        if (active) {
+          el.classList.remove('dragging');
+          document.documentElement.classList.remove('drag-on');
+          window.addEventListener('click', blockClick, { capture: true, once: true });
+          window.setTimeout(() => window.removeEventListener('click', blockClick, { capture: true }), 400);
+        }
       }
-      const cur = el.getBoundingClientRect();
-      const dir = y - (cur.top + cur.height / 2);
-      for (const other of Array.from(document.querySelectorAll<HTMLElement>(`[data-drag-scope="${scope}"]`))) {
-        const oid = other.dataset.dragId!;
-        if (oid === id) continue;
-        const r = other.getBoundingClientRect();
-        const below = r.top > cur.top;
-        if (below ? y > r.top + r.height / 2 : y < r.top + r.height / 2) { if ((below && dir > 0) || (!below && dir < 0)) onOver(id, oid); break; }
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    const move = (ev: PointerEvent) => { y = ev.clientY; };
-    const end = () => {
-      cancelAnimationFrame(raf);
-      el.classList.remove('dragging');
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', end);
-      window.removeEventListener('pointercancel', end);
-    };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', end);
-    window.addEventListener('pointercancel', end);
-    raf = requestAnimationFrame(tick);
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', cleanup);
+      window.addEventListener('pointercancel', cleanup);
+    },
   };
-  return (
-    <button className="grip" aria-label={`גרירת ${label}`} onPointerDown={start}>
-      <Svg size={22} sw={2}><path d="M5 9h14M5 15h14" /></Svg>
-    </button>
-  );
 }
 
 /** Back arrow at the start (right in RTL) of a screen header. */
