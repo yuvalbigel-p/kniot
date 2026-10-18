@@ -13,7 +13,7 @@ export function IconChip({ icon, small }: { icon: IconId; small?: boolean }) {
   const [c, bg] = iconColors(icon);
   return (
     <span className={`chip${small ? ' sm' : ''}`} style={{ background: bg, color: c }}>
-      <Svg d={iconDef(icon).d} size={small ? 14 : 17} sw={small ? 2 : 1.8} />
+      <Svg d={iconDef(icon).d} size={small ? 17 : 21} sw={small ? 1.9 : 1.7} />
     </span>
   );
 }

@@ -2,7 +2,8 @@ export type IconId =
   | 'produce' | 'fruit' | 'dairy' | 'eggs' | 'bakery' | 'grains'
   | 'meat' | 'fish' | 'frozen' | 'pantry' | 'spices' | 'snacks'
   | 'sweets' | 'drinks' | 'coffee' | 'cleaning' | 'bath' | 'paper'
-  | 'baby' | 'pets' | 'pharmacy' | 'home' | 'party' | 'other';
+  | 'baby' | 'pets' | 'pharmacy' | 'home' | 'party' | 'other'
+  | 'sauce' | 'scale' | 'pasta' | 'canned' | 'cart' | 'gift' | 'plant' | 'tools' | 'heart' | 'office';
 
 export interface Section { id: string; name: string; icon: IconId }
 export interface Item { id: string; sectionId: string; name: string; target: number }

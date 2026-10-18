@@ -66,8 +66,8 @@ html, body { overflow: hidden; position: fixed; inset: 0; inline-size: 100%; }
 .card-head { display: flex; align-items: center; gap: 10px; min-block-size: 40px; }
 .card-head .name { font-family: var(--serif); font-weight: var(--title-weight); font-size: 22px; line-height: 1.2; flex: 1; min-inline-size: 0; overflow-wrap: anywhere; }
 .card-head .count { font-size: 12px; color: var(--ink-soft); }
-.chip { inline-size: 32px; block-size: 32px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.chip.sm { inline-size: 26px; block-size: 26px; border-radius: 8px; }
+.chip { inline-size: 38px; block-size: 38px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.chip.sm { inline-size: 30px; block-size: 30px; border-radius: 8px; }
 
 .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-block-size: 52px; border-block-start: 1px solid var(--sep); }
 .row .rname { background: none; border: 0; padding: 12px 0; text-align: start; font-size: 15.5px; flex: 1; min-inline-size: 0; overflow-wrap: anywhere; }
@@ -156,7 +156,7 @@ html, body { overflow: hidden; position: fixed; inset: 0; inline-size: 100%; }
 @keyframes up { from { transform: translateY(100%); } }
 @keyframes fade { from { opacity: 0; } }
 .icon-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
-.icon-grid button { block-size: 48px; border-radius: 14px; border: 0; display: flex; align-items: center; justify-content: center; }
+.icon-grid button { block-size: 54px; border-radius: 14px; border: 0; display: flex; align-items: center; justify-content: center; }
 .icon-grid button[aria-pressed='true'] { box-shadow: 0 0 0 2px var(--ink); }
 .divider { block-size: 1px; background: var(--sep); }
 .note { font-size: 14px; line-height: 1.55; }

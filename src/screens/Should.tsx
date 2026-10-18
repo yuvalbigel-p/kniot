@@ -237,7 +237,7 @@ function SectionSheet({ id, onClose }: { id: string | null; onClose: () => void 
             const [c, bg] = iconColors(ic.id);
             return (
               <button key={ic.id} type="button" aria-label={ic.label} aria-pressed={icon === ic.id} style={{ background: bg, color: c }} onClick={() => setIcon(ic.id)}>
-                <Svg d={ic.d} size={22} />
+                <Svg d={ic.d} size={28} sw={1.6} />
               </button>
             );
           })}
