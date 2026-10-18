@@ -11,6 +11,8 @@ export interface ShouldList {
   updatedAt: string;
   sections: Section[];
   items: Item[];
+  /** Started from an empty list: no stock-count step, the list goes straight to shopping. */
+  blank?: boolean;
 }
 export type Counts = Record<string, number>;
 export interface ShoppingLine {

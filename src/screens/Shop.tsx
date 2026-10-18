@@ -42,7 +42,7 @@ export function ShopScreen() {
     <div className="screen">
       <header className="head">
         <div className="head-top">
-          <div className="head-start"><BackButton to="check" label="חזרה למה יש" /><span className="eyebrow">קניות</span></div>
+          <div className="head-start"><BackButton to={should?.blank ? 'should' : 'check'} label={should?.blank ? 'חזרה למה צריך' : 'חזרה למה יש'} /><span className="eyebrow">קניות</span></div>
           <div className="head-actions"><HomeButton />
           <button className="icon-btn" aria-label="עוד פעולות" aria-haspopup="menu" onClick={() => setMenu(true)}>
             <Svg size={20}><circle cx="5" cy="12" r="1.4" fill="currentColor" /><circle cx="12" cy="12" r="1.4" fill="currentColor" /><circle cx="19" cy="12" r="1.4" fill="currentColor" /></Svg>

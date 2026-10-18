@@ -23,7 +23,7 @@ export function starterShould(): ShouldList {
 
 /** "Empty" list for a fresh start: one general section so items can be added immediately. */
 export function quickStartShould(): ShouldList {
-  const out = emptyShould();
+  const out = { ...emptyShould(), blank: true };
   out.sections.push({ id: nanoid(8), name: 'כללי', icon: 'other' });
   return out;
 }

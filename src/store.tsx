@@ -80,8 +80,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   countsRef.current = counts;
   const replaceWithUndo = useCallback((s: ShouldList, msg: string) => {
     replaceShould(s);
+    setShop(emptyShop());
     showToast(msg);
-  }, [replaceShould, showToast]);
+  }, [replaceShould, setShop, showToast]);
 
   const value = useMemo<Store>(() => ({
     should, setShould, replaceShould, replaceWithUndo, defaultList, saveDefault: (l) => setDefaultList(l), counts, setCounts, shop, setShop,

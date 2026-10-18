@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useStore } from '../store';
 import { go } from '../route';
 import type { IconId, Item, Section, ShouldList } from '../logic/types';
+import { exportList } from '../logic/shopping';
 import * as S from '../logic/should';
 import { ICONS, iconColors } from '../logic/icons';
 import { BackButton, HomeButton, IconChip, Menu, dragProps, Chevron, CollapseAll, Grip, useCollapsed, Sheet, ShareIcon, Stepper, Steps, Svg, TabBar, useFocusOnMount } from '../components';
@@ -14,7 +15,7 @@ type Sheets =
   | null;
 
 export function ShouldScreen() {
-  const { should, setShould, defaultList, saveDefault, showToast, replaceWithUndo } = useStore();
+  const { should, setShould, setShop, defaultList, saveDefault, showToast, replaceWithUndo } = useStore();
   const [menu, setMenu] = useState(false);
   const [sheet, setSheet] = useState<Sheets>(null);
   const [adding, setAdding] = useState<string | null>(() =>
@@ -42,7 +43,7 @@ export function ShouldScreen() {
       </header>
       <Menu open={menu} onClose={() => setMenu(false)}>
         <button role="menuitem" onClick={() => { saveDefault(should); showToast('נשמר כרשימת ברירת המחדל'); }}>שמירה כברירת מחדל</button>
-        <button role="menuitem" disabled={!defaultList} onClick={() => replaceWithUndo({ ...defaultList!, updatedAt: new Date().toISOString() }, 'נטענה ברירת המחדל')}>טעינת ברירת המחדל</button>
+        <button role="menuitem" disabled={!defaultList} onClick={() => replaceWithUndo({ ...defaultList!, blank: undefined, updatedAt: new Date().toISOString() }, 'נטענה ברירת המחדל')}>טעינת ברירת המחדל</button>
       </Menu>
       <div className="scroll">
         <CollapseAll ids={should.sections.map((x) => x.id)} isCollapsed={isCollapsed} setAll={setAll} />
@@ -84,8 +85,8 @@ export function ShouldScreen() {
         {<button className="add-section" onClick={() => setSheet({ kind: 'section', id: null })}>+ קטגוריה חדשה</button>}
       </div>
       <div className="cta">
-        <button className="btn primary block big" onClick={() => go('check')}>
-          <span className="col">המשך לספירת המלאי<small>שלב הבא: מה יש בבית</small></span>
+        <button className="btn primary block big" disabled={!!should.blank && !should.items.length} onClick={() => { if (should.blank) { if (!should.items.length) return; setShop(exportList(should, {}, { createdAt: '', lines: [] })); go('shop'); } else go('check'); }}>
+          <span className="col">{should.blank ? 'לרשימת הקניות' : 'המשך לספירת המלאי'}<small>{should.blank ? 'כל הפריטים עוברים לקנייה' : 'שלב הבא: מה יש בבית'}</small></span>
           <Svg size={20}><path d="M19 12H5M11 6l-6 6 6 6" /></Svg>
         </button>
       </div>
