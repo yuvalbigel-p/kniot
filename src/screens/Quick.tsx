@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useStore } from '../store';
 import { addOneOff, progress } from '../logic/shopping';
-import { HomeButton, Menu, Svg } from '../components';
+import { HomeButton, Menu, Stepper, Svg } from '../components';
 
 /** Path 2: a standalone checklist for a single trip. Independent of the should list and the weekly shopping list. */
 export function QuickScreen() {
@@ -12,6 +12,7 @@ export function QuickScreen() {
   const { done, total, ratio } = progress(quick);
 
   const toggle = (id: string) => setQuick((p) => ({ ...p, lines: p.lines.map((l) => (l.id === id ? { ...l, checked: !l.checked } : l)) }));
+  const setQty = (id: string, qty: number) => setQuick((p) => ({ ...p, lines: p.lines.map((l) => (l.id === id ? { ...l, qty } : l)) }));
   const remove = (id: string) => setQuick((p) => ({ ...p, lines: p.lines.filter((l) => l.id !== id) }));
   const add = () => {
     const r = addOneOff(quick, val);
@@ -59,6 +60,7 @@ export function QuickScreen() {
                 <input type="checkbox" className="chk" checked={l.checked} onChange={() => toggle(l.id)} />
                 <span className="lname">{l.name}</span>
               </label>
+              <Stepper value={l.qty} min={1} label={`כמות ${l.name}`} onChange={(n) => setQty(l.id, n)} />
               <button className="icon-btn" style={{ margin: 0 }} aria-label={`הסרת ${l.name}`} onClick={() => remove(l.id)}>
                 <Svg size={18}><path d="M6 6l12 12M18 6L6 18" /></Svg>
               </button>
