@@ -191,8 +191,13 @@ export function dragProps(id: string, scope: string, onOver: (id: string, target
       };
       const timer = window.setTimeout(() => {
         active = true;
+        const top0 = el.getBoundingClientRect().top;
         el.classList.add('dragging');
         document.documentElement.classList.add('drag-on');
+        if (scope === 'sections') {
+          document.documentElement.classList.add('drag-sections');
+          if (scroller) scroller.scrollTop += el.getBoundingClientRect().top - top0;
+        }
         window.addEventListener('touchmove', blockTouch, { passive: false });
         navigator.vibrate?.(15);
         raf = requestAnimationFrame(tick);
@@ -210,7 +215,7 @@ export function dragProps(id: string, scope: string, onOver: (id: string, target
         window.removeEventListener('touchmove', blockTouch);
         if (active) {
           el.classList.remove('dragging');
-          document.documentElement.classList.remove('drag-on');
+          document.documentElement.classList.remove('drag-on', 'drag-sections');
           window.addEventListener('click', blockClick, { capture: true, once: true });
           window.setTimeout(() => window.removeEventListener('click', blockClick, { capture: true }), 400);
         }

@@ -308,3 +308,5 @@ textarea.field { block-size: 96px; padding-block: 12px; resize: none; direction:
 html.drag-on, html.drag-on * { -webkit-user-select: none; user-select: none; cursor: grabbing; }
 
 .card-head .chev { margin-inline: -10px -4px; color: var(--ink-soft); }
+
+html.drag-sections [data-drag-scope="sections"] > :not(.card-head):not(.group-head) { display: none; }
