@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '../store';
-import { quickStartShould, starterShould } from '../logic/starter';
+import { starterShould } from '../logic/starter';
 import type { ShouldList } from '../logic/types';
 import { go, isIOSBrowser } from '../route';
 import { ShareIcon, Svg } from '../components';
@@ -17,7 +17,7 @@ export function WelcomeScreen() {
     if (should) replaceWithUndo(s, msg); else { setShould(s); setShop({ createdAt: new Date().toISOString(), lines: [] }); showToast(msg); }
     go(to, true);
   };
-  const fresh = (s: ShouldList): ShouldList => ({ ...s, blank: undefined, updatedAt: new Date().toISOString() });
+  const fresh = (s: ShouldList): ShouldList => ({ ...s, updatedAt: new Date().toISOString() });
   const pick = (id: string) => { setTheme(applyTheme(id)); saveTheme(id); };
 
   return (
@@ -41,7 +41,7 @@ export function WelcomeScreen() {
             <b>רשימת ברירת מחדל</b>
             <span>{defaultList ? `הרשימה ששמרתם: ${defaultList.items.length} פריטים ב־${defaultList.sections.length} קטגוריות.` : '5 קטגוריות ו־20 פריטים בסיסיים. אפשר לערוך ולשמור כברירת מחדל.'}</span>
           </button>}
-          <button className="choice" onClick={() => apply(quickStartShould(), 'נפתחה רשימה ריקה')}><b>רשימה ריקה</b><span>לוח נקי: מוסיפים פריטים ועוברים ישר לרשימת הקניות.</span></button>
+          <button className="choice" onClick={() => { setShop({ createdAt: new Date().toISOString(), lines: [] }); showToast('נפתחה רשימת קניות ריקה'); go('shop'); }}><b>רשימת קניות ריקה</b><span>קנייה חד־פעמית. רשימת ״מה צריך״ שלכם לא משתנה.</span></button>
           <button className="choice" onClick={() => setPaste(true)}><b>ייבוא קישור</b><span>קיבלתם רשימה? העתיקו את הקישור ולחצו כאן.</span></button>
         </div>
         {previousList && (
