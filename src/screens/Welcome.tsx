@@ -31,18 +31,19 @@ export function WelcomeScreen() {
           <p>מה צריך, מה יש, ומה לקנות.</p>
         </div>
         <div className="stack" style={{ gap: 12 }}>
-          <button className="choice primary" onClick={() => apply(fresh(defaultList ?? starterShould()), 'נטענה רשימת ברירת המחדל')}>
+          {should && (
+            <a className="choice primary" href={`#/${lastTab}`}>
+              <b>המשך ברשימה שלי</b>
+              <span>הרשימה השמורה במכשיר: {should.items.length} פריטים ב־{should.sections.length} קטגוריות.</span>
+            </a>
+          )}
+          <button className={`choice${should ? '' : ' primary'}`} onClick={() => apply(fresh(defaultList ?? starterShould()), 'נטענה רשימת ברירת המחדל')}>
             <b>רשימת ברירת מחדל</b>
-            <span>{defaultList ? `הרשימה ששמרתם: ${defaultList.items.length} פריטים ב־${defaultList.sections.length} קטגוריות.` : '5 קטגוריות ו־20 פריטים בסיסיים. אפשר לערוך ולשמור כברירת מחדל.'}</span>
+            <span>{should ? 'מחליפה את הרשימה הנוכחית. ' : ''}{defaultList ? `הרשימה ששמרתם: ${defaultList.items.length} פריטים ב־${defaultList.sections.length} קטגוריות.` : '5 קטגוריות ו־20 פריטים בסיסיים. אפשר לערוך ולשמור כברירת מחדל.'}</span>
           </button>
           <button className="choice" onClick={() => apply(quickStartShould(), 'נפתחה רשימה ריקה')}><b>רשימה ריקה</b><span>קטגוריה אחת מוכנה, מתחילים להוסיף פריטים מיד.</span></button>
           <button className="choice" onClick={() => setPaste(true)}><b>ייבוא קישור</b><span>קיבלתם רשימה? העתיקו את הקישור ולחצו כאן.</span></button>
         </div>
-        {should && (
-          <a className="link-btn continue" href={`#/${lastTab}`}>
-            המשך ברשימה הנוכחית<Svg size={18} sw={2}><path d="M15 6l-6 6 6 6" /></Svg>
-          </a>
-        )}
         <div className="skins">
           <button className="link-btn skins-toggle" aria-expanded={skinsOpen} aria-controls="skin-grid" onClick={() => setSkinsOpen((v) => !v)}>
             <Svg size={18}><circle cx="12" cy="12" r="9" /><circle cx="8.5" cy="10" r="1.2" fill="currentColor" stroke="none" /><circle cx="12" cy="7.5" r="1.2" fill="currentColor" stroke="none" /><circle cx="15.5" cy="10" r="1.2" fill="currentColor" stroke="none" /><path d="M12 21c-1.5 0-2-1.2-1.4-2.4.5-1 0-2.1-1.1-2.1H8a3 3 0 010-6" /></Svg>

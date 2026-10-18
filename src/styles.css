@@ -179,7 +179,7 @@ html, body { overflow: hidden; position: fixed; inset: 0; inline-size: 100%; }
 .brand .logo { inline-size: 64px; block-size: 64px; border-radius: 20px; background: var(--card); border: var(--bw) solid var(--line); display: flex; align-items: center; justify-content: center; }
 .brand h1 { font-weight: var(--title-weight); font-family: var(--serif); font-size: 40px; color: var(--ink); line-height: 1.1; }
 .brand p { color: var(--ink-soft); }
-.choice { box-shadow: var(--shadow-card); text-align: start; display: flex; flex-direction: column; gap: 3px; padding: 16px; min-block-size: 64px; background: var(--card); border: var(--bw) solid var(--line); border-radius: var(--r-card); inline-size: 100%; }
+.choice { text-decoration: none; box-shadow: var(--shadow-card); text-align: start; display: flex; flex-direction: column; gap: 3px; padding: 16px; min-block-size: 64px; background: var(--card); border: var(--bw) solid var(--line); border-radius: var(--r-card); inline-size: 100%; }
 .choice b { font-weight: 600; font-size: 15.5px; }
 .choice span { font-size: 13px; color: var(--ink-soft); }
 .choice.primary { background: var(--accent-strong); border-color: var(--accent-strong); }
