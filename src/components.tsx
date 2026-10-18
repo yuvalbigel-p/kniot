@@ -154,7 +154,7 @@ export const HomeButton = () => (
   </a>
 );
 
-/** Long-press (350ms) on the element's handle, then drag it over its `[data-drag-scope]` siblings; onOver(draggedId, targetId) fires when it crosses a neighbour's midpoint. Spread the result on the handle (e.g. the name). */
+/** Press on the handle (a grip with touch-action:none) and drag the element over its `[data-drag-scope]` siblings; onOver(draggedId, targetId) fires when it crosses a neighbour's midpoint. Spread the result on the grip. */
 export function dragProps(id: string, scope: string, onOver: (id: string, targetId: string) => void) {
   return {
     'data-drag-handle': '',
@@ -170,6 +170,7 @@ export function dragProps(id: string, scope: string, onOver: (id: string, target
       const y0 = y;
       let active = false;
       let raf = 0;
+      let grab = 0;
       const blockTouch = (ev: TouchEvent) => { if (ev.cancelable) ev.preventDefault(); };
       const blockClick = (ev: MouseEvent) => { ev.stopPropagation(); ev.preventDefault(); };
       const tick = () => {
@@ -178,36 +179,33 @@ export function dragProps(id: string, scope: string, onOver: (id: string, target
           if (y < r.top + 70) scroller.scrollTop -= 12;
           else if (y > r.bottom - 70) scroller.scrollTop += 12;
         }
+        el.style.transform = 'none';
         const cur = el.getBoundingClientRect();
-        const dir = y - (cur.top + cur.height / 2);
+        el.style.transform = `translateY(${y - grab - cur.top}px) scale(1.02)`;
         for (const other of Array.from(document.querySelectorAll<HTMLElement>(`[data-drag-scope="${scope}"]`))) {
-          const oid = other.dataset.dragId!;
-          if (oid === id) continue;
+          if (other.dataset.dragId === id) continue;
           const r = other.getBoundingClientRect();
-          const below = r.top > cur.top;
-          if (below ? y > r.top + r.height / 2 : y < r.top + r.height / 2) { if ((below && dir > 0) || (!below && dir < 0)) onOver(id, oid); break; }
+          const mid = r.top + r.height / 2;
+          if (r.top > cur.top ? y > mid : y < mid) { onOver(id, other.dataset.dragId!); break; }
         }
         raf = requestAnimationFrame(tick);
       };
-      const timer = window.setTimeout(() => {
+      const begin = () => {
         active = true;
-        const top0 = el.getBoundingClientRect().top;
+        grab = y0 - el.getBoundingClientRect().top;
         el.classList.add('dragging');
         document.documentElement.classList.add('drag-on');
-        if (scope === 'sections') {
-          document.documentElement.classList.add('drag-sections');
-          if (scroller) scroller.scrollTop += el.getBoundingClientRect().top - top0;
-        }
         window.addEventListener('touchmove', blockTouch, { passive: false });
         navigator.vibrate?.(15);
         raf = requestAnimationFrame(tick);
-      }, 350);
+      };
+      e.preventDefault();
+      begin();
       const move = (ev: PointerEvent) => {
         y = ev.clientY;
         if (!active && Math.hypot(ev.clientX - x0, ev.clientY - y0) > 8) cleanup();
       };
       function cleanup() {
-        window.clearTimeout(timer);
         cancelAnimationFrame(raf);
         window.removeEventListener('pointermove', move);
         window.removeEventListener('pointerup', cleanup);
@@ -215,9 +213,10 @@ export function dragProps(id: string, scope: string, onOver: (id: string, target
         window.removeEventListener('touchmove', blockTouch);
         if (active) {
           el.classList.remove('dragging');
-          document.documentElement.classList.remove('drag-on', 'drag-sections');
+          el.style.transform = '';
+          document.documentElement.classList.remove('drag-on');
           window.addEventListener('click', blockClick, { capture: true, once: true });
-          window.setTimeout(() => window.removeEventListener('click', blockClick, { capture: true }), 400);
+          window.setTimeout(() => window.removeEventListener('click', blockClick, { capture: true }), 250);
         }
       }
       window.addEventListener('pointermove', move);
@@ -245,7 +244,12 @@ export function useCollapsed() {
     try { localStorage.setItem(COLLAPSED_KEY, JSON.stringify(n)); } catch { /* optional */ }
     return n;
   });
-  return { isCollapsed: (id: string) => ids.includes(id), toggle };
+  const setAll = (all: string[], collapsed: boolean) => {
+    const n = collapsed ? Array.from(new Set([...ids, ...all])) : ids.filter((x) => !all.includes(x));
+    try { localStorage.setItem(COLLAPSED_KEY, JSON.stringify(n)); } catch { /* optional */ }
+    setIds(n);
+  };
+  return { isCollapsed: (id: string) => ids.includes(id), toggle, setAll };
 }
 
 export const Chevron = ({ open, onClick, label }: { open: boolean; onClick: () => void; label: string }) => (
@@ -253,3 +257,23 @@ export const Chevron = ({ open, onClick, label }: { open: boolean; onClick: () =
     <Svg size={20} sw={2.2}><path d={open ? 'M6 9l6 6 6-6' : 'M15 6l-6 6 6 6'} /></Svg>
   </button>
 );
+
+export function Grip({ label, ...drag }: { label: string } & ReturnType<typeof dragProps>) {
+  return (
+    <button className="grip" aria-label={`גרירת ${label}`} {...drag}>
+      <Svg size={20} sw={2}><path d="M5 9h14M5 15h14" /></Svg>
+    </button>
+  );
+}
+
+/** One-tap fold/unfold of every section. */
+export function CollapseAll({ ids, isCollapsed, setAll }: { ids: string[]; isCollapsed: (id: string) => boolean; setAll: (ids: string[], collapsed: boolean) => void }) {
+  if (ids.length < 2) return null;
+  const all = ids.every(isCollapsed);
+  return (
+    <button className="collapse-all" onClick={() => setAll(ids, !all)}>
+      <Svg size={18} sw={2.2}><path d={all ? 'M6 9l6 6 6-6' : 'M6 15l6-6 6 6'} /></Svg>
+      {all ? 'הרחבת הכל' : 'כיווץ הכל — לסידור קטגוריות'}
+    </button>
+  );
+}

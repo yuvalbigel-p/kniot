@@ -301,7 +301,7 @@ textarea.field { block-size: 96px; padding-block: 12px; resize: none; direction:
 .add-section.solid { border-style: solid; border-color: var(--line, currentColor); color: var(--ink); margin-block-start: 8px; }
 
 .grip { inline-size: 44px; block-size: 44px; margin-block: -6px; margin-inline-end: -8px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: none; color: var(--accent-strong); touch-action: none; cursor: grab; -webkit-user-select: none; user-select: none; }
-[data-drag-id].dragging { box-shadow: 0 8px 24px rgba(0,0,0,.22); transform: scale(1.02); position: relative; z-index: 2; }
+[data-drag-id].dragging { box-shadow: 0 8px 24px rgba(0,0,0,.22); position: relative; z-index: 5; transition: none; background: var(--card); }
 [data-drag-id] { transition: transform .12s; }
 
 [data-drag-handle] { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -309,4 +309,6 @@ html.drag-on, html.drag-on * { -webkit-user-select: none; user-select: none; cur
 
 .card-head .chev { margin-inline: -10px -4px; color: var(--ink-soft); }
 
-html.drag-sections [data-drag-scope="sections"] > :not(.card-head):not(.group-head) { display: none; }
+.grip { inline-size: 40px; block-size: 40px; margin-block: -6px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: none; color: var(--ink-soft); touch-action: none; cursor: grab; flex: none; -webkit-user-select: none; user-select: none; }
+.group-head .grip { margin-inline-start: auto; }
+.collapse-all { display: flex; align-items: center; gap: 6px; background: none; border: 0; color: var(--accent-strong); font-size: 13.5px; font-weight: 600; padding: 4px 2px 12px; }

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../store';
 import { addOneOff, groupLines, progress } from '../logic/shopping';
-import { BackButton, HomeButton, IconChip, Menu, dragProps, Sheet, Stepper, Steps, Svg, TabBar } from '../components';
+import { BackButton, HomeButton, IconChip, Menu, dragProps, Grip, Sheet, Stepper, Steps, Svg, TabBar } from '../components';
 import { addItem, checkItemName, moveSectionTo } from '../logic/should';
 import type { ShoppingLine } from '../logic/types';
 
@@ -71,7 +71,8 @@ export function ShopScreen() {
             <section key={g.key} aria-label={g.title} {...(g.sectionId ? { 'data-drag-id': g.sectionId, 'data-drag-scope': 'sections' } : {})}>
               <div className="group-head">
                 {s ? <IconChip icon={s.icon} small /> : <IconChip icon="other" small />}
-                <span {...(g.sectionId ? dragProps(g.sectionId, 'sections', (a, b) => setShould((p) => (p ? moveSectionTo(p, a, b) : p))) : {})}>{g.title}</span>
+                <span>{g.title}</span>
+                {g.sectionId && <Grip label={g.title} {...dragProps(g.sectionId, 'sections', (a, b) => setShould((p) => (p ? moveSectionTo(p, a, b) : p)))} />}
               </div>
               <>
               {g.lines.map((l) => (
