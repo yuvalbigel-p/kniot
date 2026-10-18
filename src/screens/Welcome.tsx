@@ -8,7 +8,7 @@ import { PasteSheet } from './Share';
 import { THEMES, applyTheme, loadTheme, saveTheme } from '../theme';
 
 export function WelcomeScreen() {
-  const { should, setShould, setShop, replaceWithUndo, defaultList, lastTab, showToast } = useStore();
+  const { should, previousList, restorePrevious, setShould, setShop, replaceWithUndo, defaultList, lastTab, showToast } = useStore();
   const [paste, setPaste] = useState(false);
   const [theme, setTheme] = useState(loadTheme);
   const [skinsOpen, setSkinsOpen] = useState(false);
@@ -44,6 +44,9 @@ export function WelcomeScreen() {
           <button className="choice" onClick={() => apply(quickStartShould(), 'נפתחה רשימה ריקה')}><b>רשימה ריקה</b><span>לוח נקי: מוסיפים פריטים ועוברים ישר לרשימת הקניות.</span></button>
           <button className="choice" onClick={() => setPaste(true)}><b>ייבוא קישור</b><span>קיבלתם רשימה? העתיקו את הקישור ולחצו כאן.</span></button>
         </div>
+        {previousList && (
+          <button className="link-btn" onClick={() => { restorePrevious(); go('should', true); }}>שחזור הרשימה הקודמת ({previousList.items.length} פריטים)</button>
+        )}
         <div className="skins">
           <button className="link-btn skins-toggle" aria-expanded={skinsOpen} aria-controls="skin-grid" onClick={() => setSkinsOpen((v) => !v)}>
             <Svg size={18}><circle cx="12" cy="12" r="9" /><circle cx="8.5" cy="10" r="1.2" fill="currentColor" stroke="none" /><circle cx="12" cy="7.5" r="1.2" fill="currentColor" stroke="none" /><circle cx="15.5" cy="10" r="1.2" fill="currentColor" stroke="none" /><path d="M12 21c-1.5 0-2-1.2-1.4-2.4.5-1 0-2.1-1.1-2.1H8a3 3 0 010-6" /></Svg>

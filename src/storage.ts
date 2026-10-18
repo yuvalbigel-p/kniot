@@ -6,6 +6,7 @@ export const KEYS = {
   shop: 'kaniyot.shop.v1',
   ui: 'kaniyot.ui.v1',
   default: 'kaniyot.default.v1',
+  previous: 'kaniyot.previous.v1',
   theme: 'kaniyot.theme.v1',
 } as const;
 

@@ -17,6 +17,9 @@ interface Store {
   /** Replace the list with no confirm; shows a plain toast. */
   replaceWithUndo: (s: ShouldList, msg: string) => void;
   defaultList: ShouldList | null;
+  /** The list that was active before the last replacement, kept silently so it can be restored. */
+  previousList: ShouldList | null;
+  restorePrevious: () => void;
   saveDefault: (s: ShouldList) => void;
   counts: Counts;
   setCounts: (c: Counts | ((p: Counts) => Counts)) => void;
@@ -54,6 +57,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const [defaultList, setDefaultList] = useStoredState<ShouldList | null>(KEYS.default, () => null, nullable);
+  const [previousList, setPreviousList] = useStoredState<ShouldList | null>(KEYS.previous, () => null, nullable);
   const [counts, setCounts] = useStoredState<Counts>(KEYS.counts, () => ({}), isCounts);
   const [shop, setShop] = useStoredState<ShoppingList>(KEYS.shop, emptyShop, isShoppingList);
   const [ui, setUi] = useStoredState<UiState>(KEYS.ui, () => ({ lastTab: 'should' }), isUiState);
@@ -72,9 +76,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => { if (consumeCorruption()) showToast('שחזרנו הגדרות ברירת מחדל'); }, [showToast]);
 
   const replaceShould = useCallback((s: ShouldList) => {
+    if (shouldRef.current && shouldRef.current.items.length) setPreviousList(shouldRef.current);
     setShould(s);
     setCounts((c) => pruneCounts(c, s));
-  }, [setShould, setCounts]);
+  }, [setShould, setCounts, setPreviousList]);
 
   const countsRef = useRef(counts);
   countsRef.current = counts;
@@ -84,11 +89,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     showToast(msg);
   }, [replaceShould, setShop, showToast]);
 
+  const restorePrevious = useCallback(() => {
+    const prev = previousList;
+    if (!prev) return;
+    if (shouldRef.current && shouldRef.current.items.length) setPreviousList(shouldRef.current);
+    setShould(prev);
+    setShop(emptyShop());
+    showToast('הרשימה הקודמת שוחזרה');
+  }, [previousList, setPreviousList, setShould, setShop, showToast]);
+
   const value = useMemo<Store>(() => ({
-    should, setShould, replaceShould, replaceWithUndo, defaultList, saveDefault: (l) => setDefaultList(l), counts, setCounts, shop, setShop,
+    should, setShould, replaceShould, replaceWithUndo, defaultList, previousList, restorePrevious, saveDefault: (l) => setDefaultList(l), counts, setCounts, shop, setShop,
     lastTab: ui.lastTab, setLastTab: (t) => setUi({ lastTab: t }),
     toast, showToast, dismissToast, confirm, askConfirm,
-  }), [should, setShould, replaceShould, replaceWithUndo, defaultList, setDefaultList, counts, setCounts, shop, setShop, ui.lastTab, setUi, toast, showToast, dismissToast, confirm]);
+  }), [should, setShould, replaceShould, replaceWithUndo, defaultList, previousList, restorePrevious, setDefaultList, counts, setCounts, shop, setShop, ui.lastTab, setUi, toast, showToast, dismissToast, confirm]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

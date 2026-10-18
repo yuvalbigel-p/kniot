@@ -15,7 +15,7 @@ type Sheets =
   | null;
 
 export function ShouldScreen() {
-  const { should, setShould, setShop, defaultList, saveDefault, showToast, replaceWithUndo } = useStore();
+  const { should, setShould, setShop, previousList, restorePrevious, defaultList, saveDefault, showToast, replaceWithUndo } = useStore();
   const [menu, setMenu] = useState(false);
   const [sheet, setSheet] = useState<Sheets>(null);
   const [adding, setAdding] = useState<string | null>(() =>
@@ -43,6 +43,7 @@ export function ShouldScreen() {
       </header>
       <Menu open={menu} onClose={() => setMenu(false)}>
         <button role="menuitem" onClick={() => { saveDefault(should); showToast('נשמר כרשימת ברירת המחדל'); }}>שמירה כברירת מחדל</button>
+        <button role="menuitem" disabled={!previousList} onClick={() => { setMenu(false); restorePrevious(); }}>שחזור הרשימה הקודמת</button>
         <button role="menuitem" disabled={!defaultList} onClick={() => replaceWithUndo({ ...defaultList!, blank: undefined, updatedAt: new Date().toISOString() }, 'נטענה ברירת המחדל')}>טעינת ברירת המחדל</button>
       </Menu>
       <div className="scroll">
