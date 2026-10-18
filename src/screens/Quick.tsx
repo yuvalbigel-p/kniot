@@ -46,6 +46,10 @@ export function QuickScreen() {
         <button role="menuitem" disabled={!quick.lines.some((l) => l.checked)} onClick={() => { setMenu(false); clearChecked(); }}>ניקוי מסומנים</button>
         <button role="menuitem" className="danger" disabled={!total} onClick={() => { setMenu(false); clearAll(); }}>ניקוי הרשימה</button>
       </Menu>
+      <form className="quick top" onSubmit={(e) => { e.preventDefault(); add(); }}>
+        <input className="field" value={val} onChange={(e) => setVal(e.target.value)} placeholder="הוספת פריט…" aria-label="פריט חדש" />
+        <button className="add" type="submit" aria-label="הוספה">+</button>
+      </form>
       <div className="scroll">
         {total === 0 && <div className="empty"><h2>הרשימה ריקה</h2><p>הוסיפו פריטים למטה. הרשימה הזו נפרדת מרשימת ״מה צריך״.</p></div>}
         <section aria-label="פריטים">
@@ -62,10 +66,6 @@ export function QuickScreen() {
           ))}
         </section>
       </div>
-      <form className="quick" onSubmit={(e) => { e.preventDefault(); add(); }}>
-        <input className="field" value={val} onChange={(e) => setVal(e.target.value)} placeholder="פריט חדש" aria-label="פריט חדש" />
-        <button className="add" type="submit" aria-label="הוספה">+</button>
-      </form>
     </div>
   );
 }
