@@ -37,10 +37,10 @@ export function WelcomeScreen() {
               <span>הרשימה השמורה במכשיר: {should.items.length} פריטים ב־{should.sections.length} קטגוריות.</span>
             </a>
           )}
-          <button className={`choice${should ? '' : ' primary'}`} onClick={() => apply(fresh(defaultList ?? starterShould()), 'נטענה רשימת ברירת המחדל')}>
+          {!should && <button className="choice primary" onClick={() => apply(fresh(defaultList ?? starterShould()), 'נטענה רשימת ברירת המחדל')}>
             <b>רשימת ברירת מחדל</b>
-            <span>{should ? 'מחליפה את הרשימה הנוכחית. ' : ''}{defaultList ? `הרשימה ששמרתם: ${defaultList.items.length} פריטים ב־${defaultList.sections.length} קטגוריות.` : '5 קטגוריות ו־20 פריטים בסיסיים. אפשר לערוך ולשמור כברירת מחדל.'}</span>
-          </button>
+            <span>{defaultList ? `הרשימה ששמרתם: ${defaultList.items.length} פריטים ב־${defaultList.sections.length} קטגוריות.` : '5 קטגוריות ו־20 פריטים בסיסיים. אפשר לערוך ולשמור כברירת מחדל.'}</span>
+          </button>}
           <button className="choice" onClick={() => apply(quickStartShould(), 'נפתחה רשימה ריקה')}><b>רשימה ריקה</b><span>קטגוריה אחת מוכנה, מתחילים להוסיף פריטים מיד.</span></button>
           <button className="choice" onClick={() => setPaste(true)}><b>ייבוא קישור</b><span>קיבלתם רשימה? העתיקו את הקישור ולחצו כאן.</span></button>
         </div>
