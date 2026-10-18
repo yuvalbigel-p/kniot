@@ -10,6 +10,22 @@ import type { ShoppingList } from './types';
 
 const item = { id: 'a', sectionId: 's', name: 'x', target: 4 };
 
+describe('share link survives the hash/query round trip', () => {
+  it('decodes payloads containing + after URLSearchParams and percent-encoding', () => {
+    let hit = 0;
+    for (let i = 0; i < 40; i++) {
+      const s = starterShould();
+      s.items[0].name = `פריט ${i}`;
+      const d = encodeShould(s);
+      const viaQuery = new URLSearchParams(`d=${d}`).get('d')!;
+      expect(decodeShould(viaQuery).ok).toBe(true);
+      expect(decodeShould(encodeURIComponent(d)).ok).toBe(true);
+      if (d.includes('+')) hit++;
+    }
+    expect(hit).toBeGreaterThan(0);
+  });
+});
+
 describe('gap', () => {
   it('is target minus count, never below 0', () => {
     expect(gap(item, { a: 1 })).toBe(3);

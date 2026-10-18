@@ -94,13 +94,12 @@ export function ConfirmDialog() {
   );
 }
 
-const TABS: { id: Tab; label: string; icon: ReactNode }[] = [
-  { id: 'should', label: 'מה צריך', icon: <Svg><path d="M9 6h10M9 12h10M9 18h10" /><circle cx="4.5" cy="6" r="1.2" fill="currentColor" stroke="none" /><circle cx="4.5" cy="12" r="1.2" fill="currentColor" stroke="none" /><circle cx="4.5" cy="18" r="1.2" fill="currentColor" stroke="none" /></Svg> },
+const TABS: { id: 'check' | 'shop'; label: string; icon: ReactNode }[] = [
   { id: 'check', label: 'מה יש', icon: <Svg><circle cx="10.5" cy="10.5" r="6.5" /><path d="M19 19l-4.3-4.3" /></Svg> },
   { id: 'shop', label: 'לקנייה', icon: <Svg><circle cx="9" cy="20" r="1.2" /><circle cx="17" cy="20" r="1.2" /><path d="M3 4h2l2.4 12.5a2 2 0 001.5 1.5h8.2a2 2 0 002-1.6L21 8H6" /></Svg> },
 ];
 
-export function TabBar({ current }: { current: Tab }) {
+export function TabBar({ current }: { current: 'check' | 'shop' }) {
   return (
     <nav className="tabbar" aria-label="ניווט ראשי">
       {TABS.map((t) => (
@@ -134,10 +133,10 @@ export function useToggle(initial = false): [boolean, () => void, (v: boolean) =
   return [v, () => set((x) => !x), set];
 }
 
-const STEP_LABELS = ['מה צריך', 'מה יש', 'לקנייה'];
-export function Steps({ step }: { step: 1 | 2 | 3 }) {
+const STEP_LABELS = ['מה יש', 'לקנייה'];
+export function Steps({ step }: { step: 1 | 2 }) {
   return (
-    <div className="steps" role="img" aria-label={`שלב ${step} מתוך 3`}>
+    <div className="steps" role="img" aria-label={`שלב ${step} מתוך 2`}>
       {STEP_LABELS.map((l, i) => (
         <div key={l} className={`step${i + 1 < step ? ' done' : ''}${i + 1 === step ? ' now' : ''}`}>
           <i />

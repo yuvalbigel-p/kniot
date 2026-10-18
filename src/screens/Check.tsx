@@ -33,12 +33,12 @@ export function CheckScreen() {
     <div className="screen">
       <header className="head">
         <div className="head-top">
-          <div className="head-start"><BackButton to="should" label="חזרה למה צריך" /><span className="eyebrow">קניות</span></div>
+          <div className="head-start"><BackButton to="welcome" label="חזרה למסך הבית" /><span className="eyebrow">קניות</span></div>
           <div className="head-actions"><button className="text-btn" onClick={reset}>איפוס ספירה</button><HomeButton /></div>
         </div>
         <h1 className="title">מה יש</h1>
         <p className="sub">סמנו כמה יש מכל פריט בבית עכשיו</p>
-        <Steps step={2} />
+        <Steps step={1} />
       </header>
       <div className="scroll">
         <CollapseAll ids={should.sections.map((x) => x.id)} isCollapsed={isCollapsed} setAll={setAll} />

@@ -8,7 +8,10 @@ export type Decoded = { ok: true; list: ShouldList } | { ok: false };
 
 export function decodeShould(d: string): Decoded {
   try {
-    const json = LZ.decompressFromEncodedURIComponent(d.trim());
+    // URLSearchParams turns '+' into ' ', and chat apps may percent-encode; undo both.
+    let t = d.trim();
+    try { if (/%[0-9a-f]{2}/i.test(t)) t = decodeURIComponent(t); } catch { /* keep as is */ }
+    const json = LZ.decompressFromEncodedURIComponent(t.replace(/ /g, '+'));
     if (!json) return { ok: false };
     const parsed: unknown = JSON.parse(json);
     return isShouldList(parsed) ? { ok: true, list: parsed } : { ok: false };

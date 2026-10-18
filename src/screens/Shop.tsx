@@ -50,7 +50,7 @@ export function ShopScreen() {
         </div>
         <h1 className="title">לקנייה</h1>
         <p className="sub" aria-live="polite">{done} מתוך {total} נקנה</p>
-        <Steps step={3} />
+        <Steps step={2} />
         <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done}><div style={{ inlineSize: `${ratio * 100}%` }} /></div>
       </header>
       <Menu open={menu} onClose={() => setMenu(false)}>

@@ -8,15 +8,16 @@ import { PasteSheet } from './Share';
 import { THEMES, applyTheme, loadTheme, saveTheme } from '../theme';
 
 export function WelcomeScreen() {
-  const { should, quick, previousList, restorePrevious, setShould, setShop, replaceWithUndo, defaultList, lastTab, showToast } = useStore();
+  const { should, quick, counts, setCounts, shop, previousList, restorePrevious, setShould, setShop, replaceWithUndo, defaultList, lastTab, showToast } = useStore();
   const [paste, setPaste] = useState(false);
   const [theme, setTheme] = useState(loadTheme);
   const [skinsOpen, setSkinsOpen] = useState(false);
 
-  const apply = (s: ShouldList, msg: string, to: 'should' | 'shop' = 'should') => {
+  const apply = (s: ShouldList, msg: string, to: 'welcome' | 'shop' = 'welcome') => {
     if (should) replaceWithUndo(s, msg); else { setShould(s); setShop({ createdAt: new Date().toISOString(), lines: [] }); showToast(msg); }
     go(to, true);
   };
+  const inProgress = (lastTab === 'check' || lastTab === 'shop') && (Object.keys(counts).length > 0 || shop.lines.length > 0);
   const fresh = (s: ShouldList): ShouldList => ({ ...s, updatedAt: new Date().toISOString() });
   const pick = (id: string) => { setTheme(applyTheme(id)); saveTheme(id); };
 
@@ -31,10 +32,22 @@ export function WelcomeScreen() {
           <p>מה צריך, מה יש, ומה לקנות.</p>
         </div>
         <div className="stack" style={{ gap: 12 }}>
-          {should && (
+          {should && inProgress && (
             <a className="choice primary" href={`#/${lastTab}`}>
-              <b>המשך ברשימה שלי</b>
-              <span>הרשימה השמורה במכשיר: {should.items.length} פריטים ב־{should.sections.length} קטגוריות.</span>
+              <b>המשך מאיפה שעצרתי</b>
+              <span>{lastTab === 'shop' ? 'חזרה לרשימת הקניות.' : 'חזרה לבדיקת המלאי.'}</span>
+            </a>
+          )}
+          {should && (
+            <button className={`choice${inProgress ? '' : ' primary'}`} onClick={() => { setCounts({}); go('check'); }}>
+              <b>התחלת בדיקת מלאי</b>
+              <span>סופרים מה יש בבית ומקבלים רשימת קניות.</span>
+            </button>
+          )}
+          {should && (
+            <a className="choice" href="#/should">
+              <b>עריכת רשימת מה צריך</b>
+              <span>{should.items.length} פריטים ב־{should.sections.length} קטגוריות. עורכים רק כשמשהו משתנה.</span>
             </a>
           )}
           {!should && <button className="choice primary" onClick={() => apply(fresh(defaultList ?? starterShould()), 'נטענה רשימת ברירת המחדל')}>

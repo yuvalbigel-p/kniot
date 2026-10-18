@@ -122,7 +122,7 @@ export function ImportScreen() {
   const route = useRoute();
   const d = route.query.get('d') ?? '';
   const dec = decodeShould(d);
-  const exit = () => go(should ? 'should' : 'welcome', true);
+  const exit = () => go('welcome', true);
 
   if (!dec.ok) {
     return (
@@ -160,7 +160,7 @@ export function ImportScreen() {
   const apply = () => {
     replaceShould(incoming);
     showToast('הרשימה יובאה');
-    go('should', true);
+    go('welcome', true);
   };
 
   return (

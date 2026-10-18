@@ -4,7 +4,7 @@ import { go } from '../route';
 import type { IconId, Item, Section, ShouldList } from '../logic/types';
 import * as S from '../logic/should';
 import { ICONS, iconColors } from '../logic/icons';
-import { BackButton, HomeButton, IconChip, Menu, dragProps, Chevron, CollapseAll, Grip, useCollapsed, Sheet, ShareIcon, Stepper, Steps, Svg, TabBar, useFocusOnMount } from '../components';
+import { BackButton, HomeButton, IconChip, Menu, dragProps, Chevron, CollapseAll, Grip, useCollapsed, Sheet, ShareIcon, Stepper, Svg, useFocusOnMount } from '../components';
 import { ShareSheet } from './Share';
 
 type Sheets =
@@ -19,8 +19,8 @@ export function ShouldScreen() {
   const [sheet, setSheet] = useState<Sheets>(null);
   const [adding, setAdding] = useState<string | null>(() =>
     should && should.items.length === 0 && should.sections.length === 1 ? should.sections[0].id : null);
-  if (!should) return null;
   const { isCollapsed, toggle, setAll } = useCollapsed();
+  if (!should) return null;
   const edit = (fn: (s: ShouldList) => ShouldList) => setShould((p) => (p ? fn(p) : p));
 
   return (
@@ -37,8 +37,7 @@ export function ShouldScreen() {
           </div>
         </div>
         <h1 className="title">מה צריך</h1>
-        <p className="sub">הבסיס הקבוע שתמיד רוצים בבית</p>
-        <Steps step={1} />
+        <p className="sub">הבסיס הקבוע שתמיד רוצים בבית. עורכים רק כשמשהו משתנה.</p>
       </header>
       <Menu open={menu} onClose={() => setMenu(false)}>
         <button role="menuitem" onClick={() => { saveDefault(should); showToast('נשמר כרשימת ברירת המחדל'); }}>שמירה כברירת מחדל</button>
@@ -85,12 +84,8 @@ export function ShouldScreen() {
         {<button className="add-section" onClick={() => setSheet({ kind: 'section', id: null })}>+ קטגוריה חדשה</button>}
       </div>
       <div className="cta">
-        <button className="btn primary block big" onClick={() => go('check')}>
-          <span className="col">המשך לספירת המלאי<small>שלב הבא: מה יש בבית</small></span>
-          <Svg size={20}><path d="M19 12H5M11 6l-6 6 6 6" /></Svg>
-        </button>
+        <button className="btn primary block big" onClick={() => go('welcome')}>סיום</button>
       </div>
-      <TabBar current="should" />
       {sheet?.kind === 'share' && <ShareSheet onClose={() => setSheet(null)} />}
       {sheet?.kind === 'section' && <SectionSheet id={sheet.id} onClose={() => setSheet(null)} />}
       {sheet?.kind === 'item' && <ItemSheet id={sheet.id} onClose={() => setSheet(null)} />}
