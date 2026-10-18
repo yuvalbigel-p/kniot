@@ -85,6 +85,7 @@ export function ShouldScreen() {
           <div className="empty"><h2>אין עדיין קטגוריות</h2><p>הוסיפו קטגוריה כדי להתחיל.</p></div>
         )}
         {!reorder && <button className="add-section" onClick={() => setSheet({ kind: 'section', id: null })}>+ קטגוריה חדשה</button>}
+        {!reorder && should.sections.length > 1 && <button className="add-section solid" onClick={() => setReorder(true)}>↑↓ סידור קטגוריות</button>}
       </div>
       <div className="cta">
         {reorder ? <button className="btn primary block big" onClick={() => setReorder(false)}>סיום</button> :

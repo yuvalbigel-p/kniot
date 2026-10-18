@@ -297,3 +297,5 @@ textarea.field { block-size: 96px; padding-block: 12px; resize: none; direction:
 .head-start { display: flex; align-items: center; gap: 4px; }
 .icon-btn.back { margin-inline: -12px 0; color: var(--ink); }
 .continue { display: inline-flex; align-items: center; gap: 6px; align-self: center; text-decoration: none; }
+
+.add-section.solid { border-style: solid; border-color: var(--line, currentColor); color: var(--ink); margin-block-start: 8px; }
