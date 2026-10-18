@@ -228,3 +228,23 @@ export const BackButton = ({ to, label }: { to: string; label: string }) => (
     <Svg size={22} sw={2}><path d="M9 6l6 6-6 6" /></Svg>
   </a>
 );
+
+const COLLAPSED_KEY = 'kaniyot.collapsed.v1';
+/** Which sections are folded; a per-device convenience shared by the should and check screens. */
+export function useCollapsed() {
+  const [ids, setIds] = useState<string[]>(() => {
+    try { const v = JSON.parse(localStorage.getItem(COLLAPSED_KEY) ?? '[]'); return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []; } catch { return []; }
+  });
+  const toggle = (id: string) => setIds((p) => {
+    const n = p.includes(id) ? p.filter((x) => x !== id) : [...p, id];
+    try { localStorage.setItem(COLLAPSED_KEY, JSON.stringify(n)); } catch { /* optional */ }
+    return n;
+  });
+  return { isCollapsed: (id: string) => ids.includes(id), toggle };
+}
+
+export const Chevron = ({ open, onClick, label }: { open: boolean; onClick: () => void; label: string }) => (
+  <button className="icon-btn chev" aria-expanded={open} aria-label={`${open ? 'כיווץ' : 'הרחבת'} ${label}`} onClick={onClick}>
+    <Svg size={20} sw={2.2}><path d={open ? 'M6 9l6 6 6-6' : 'M15 6l-6 6 6 6'} /></Svg>
+  </button>
+);

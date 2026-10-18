@@ -2,11 +2,12 @@ import { useStore } from '../store';
 import { gap } from '../logic/gap';
 import { clampCount, itemsOf } from '../logic/should';
 import { countGaps, exportList, needsExportConfirm, unchecked } from '../logic/shopping';
-import { BackButton, HomeButton, IconChip, Stepper, Steps, Svg, TabBar } from '../components';
+import { BackButton, HomeButton, Chevron, IconChip, Stepper, Steps, useCollapsed, Svg, TabBar } from '../components';
 import { go } from '../route';
 
 export function CheckScreen() {
   const { should, counts, setCounts, shop, setShop, askConfirm } = useStore();
+  const { isCollapsed, toggle } = useCollapsed();
   if (!should) return null;
   const gaps = countGaps(should, counts);
 
@@ -42,8 +43,8 @@ export function CheckScreen() {
       <div className="scroll">
         {should.sections.map((sec) => (
           <section className="card" key={sec.id} aria-label={sec.name}>
-            <div className="card-head"><IconChip icon={sec.icon} /><span className="name">{sec.name}</span></div>
-            {itemsOf(should, sec.id).map((it) => {
+            <div className="card-head"><Chevron open={!isCollapsed(sec.id)} onClick={() => toggle(sec.id)} label={sec.name} /><IconChip icon={sec.icon} /><span className="name">{sec.name}</span></div>
+            {!isCollapsed(sec.id) && itemsOf(should, sec.id).map((it) => {
               const g = gap(it, counts);
               const have = counts[it.id] ?? 0;
               return (

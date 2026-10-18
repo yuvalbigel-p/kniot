@@ -4,7 +4,7 @@ import { go } from '../route';
 import type { IconId, Item, Section, ShouldList } from '../logic/types';
 import * as S from '../logic/should';
 import { ICONS, iconColors } from '../logic/icons';
-import { BackButton, HomeButton, IconChip, Menu, dragProps, Sheet, ShareIcon, Stepper, Steps, Svg, TabBar, useFocusOnMount } from '../components';
+import { BackButton, HomeButton, IconChip, Menu, dragProps, Chevron, useCollapsed, Sheet, ShareIcon, Stepper, Steps, Svg, TabBar, useFocusOnMount } from '../components';
 import { ShareSheet } from './Share';
 
 type Sheets =
@@ -20,6 +20,7 @@ export function ShouldScreen() {
   const [adding, setAdding] = useState<string | null>(() =>
     should && should.items.length === 0 && should.sections.length === 1 ? should.sections[0].id : null);
   if (!should) return null;
+  const { isCollapsed, toggle } = useCollapsed();
   const edit = (fn: (s: ShouldList) => ShouldList) => setShould((p) => (p ? fn(p) : p));
 
   return (
@@ -46,9 +47,11 @@ export function ShouldScreen() {
       <div className="scroll">
         {should.sections.map((sec) => {
           const items = S.itemsOf(should, sec.id);
+          const open = !isCollapsed(sec.id);
           return (
             <section className="card" key={sec.id} data-drag-id={sec.id} data-drag-scope="sections" aria-label={sec.name}>
               <div className="card-head">
+                <Chevron open={open} onClick={() => toggle(sec.id)} label={sec.name} />
                 <IconChip icon={sec.icon} />
                 <span className="name" {...dragProps(sec.id, 'sections', (a, b) => edit((x) => S.moveSectionTo(x, a, b)))}>{sec.name}</span>
                   <>
@@ -58,13 +61,13 @@ export function ShouldScreen() {
                     </button>
                   </>
               </div>
-              {items.map((it) => (
+              {open && items.map((it) => (
                 <div className="row" key={it.id} data-drag-id={it.id} data-drag-scope={sec.id}>
                   <button className="rname" {...dragProps(it.id, sec.id, (a, b) => edit((x) => S.moveItemTo(x, a, b)))} onClick={() => setSheet({ kind: 'item', id: it.id })}>{it.name}</button>
                   <Stepper value={it.target} min={0} label={`כמות רצויה ${it.name}`} onChange={(n) => (n < 1 ? (edit((s) => S.deleteItem(s, it.id)), showToast(`„${it.name}“ נמחק`)) : edit((s) => S.setTarget(s, it.id, n)))} />
                 </div>
               ))}
-              {adding === sec.id ? (
+              {!open ? null : adding === sec.id ? (
                 <AddItemField sectionId={sec.id} onClose={() => setAdding(null)} />
               ) : (
                 <button className="add-item" onClick={() => setAdding(sec.id)}>+ הוספת פריט</button>
