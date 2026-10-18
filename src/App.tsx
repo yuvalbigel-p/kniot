@@ -5,6 +5,7 @@ import { ConfirmDialog, Toast } from './components';
 import { ShouldScreen } from './screens/Should';
 import { CheckScreen } from './screens/Check';
 import { ShopScreen } from './screens/Shop';
+import { QuickScreen } from './screens/Quick';
 import { WelcomeScreen } from './screens/Welcome';
 import { ImportScreen } from './screens/Share';
 
@@ -25,7 +26,7 @@ function Shell() {
 
   // Resolve the landing route: nothing in the hash -> last tab (or welcome on first run).
   useEffect(() => {
-    if (route.name === 'import') return;
+    if (route.name === 'import' || route.name === 'quick') return;
     if (!should) { if (route.name !== 'welcome' || !hasRoute(location.hash)) go('welcome', true); return; }
     if (!hasRoute(location.hash)) go(RESUME ? lastTab : 'welcome', true);
   }, [route.name, should, lastTab]);
@@ -38,6 +39,7 @@ function Shell() {
 
   let screen;
   if (route.name === 'import') screen = <ImportScreen />;
+  else if (route.name === 'quick') screen = <QuickScreen />;
   else if (!should || route.name === 'welcome') screen = <WelcomeScreen />;
   else if (route.name === 'check') screen = <CheckScreen />;
   else if (route.name === 'shop') screen = <ShopScreen />;

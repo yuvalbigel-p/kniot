@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 
-export interface Route { name: 'should' | 'check' | 'shop' | 'welcome' | 'import'; query: URLSearchParams }
+export interface Route { name: 'should' | 'check' | 'shop' | 'welcome' | 'import' | 'quick'; query: URLSearchParams }
 
 export function parseHash(hash: string): Route {
   const [path, q = ''] = hash.replace(/^#/, '').split('?');
   const seg = path.replace(/^\/+/, '');
-  const name = (['should', 'check', 'shop', 'welcome', 'import'] as const).find((n) => n === seg);
+  const name = (['should', 'check', 'shop', 'welcome', 'import', 'quick'] as const).find((n) => n === seg);
   return { name: name ?? 'should', query: new URLSearchParams(q) };
 }
 
-export const hasRoute = (hash: string) => /^#\/(should|check|shop|welcome|import)/.test(hash);
+export const hasRoute = (hash: string) => /^#\/(should|check|shop|welcome|import|quick)/.test(hash);
 
 export function useRoute(): Route {
   const [route, setRoute] = useState(() => parseHash(location.hash));

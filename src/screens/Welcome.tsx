@@ -8,7 +8,7 @@ import { PasteSheet } from './Share';
 import { THEMES, applyTheme, loadTheme, saveTheme } from '../theme';
 
 export function WelcomeScreen() {
-  const { should, previousList, restorePrevious, setShould, setShop, replaceWithUndo, defaultList, lastTab, showToast } = useStore();
+  const { should, quick, previousList, restorePrevious, setShould, setShop, replaceWithUndo, defaultList, lastTab, showToast } = useStore();
   const [paste, setPaste] = useState(false);
   const [theme, setTheme] = useState(loadTheme);
   const [skinsOpen, setSkinsOpen] = useState(false);
@@ -41,7 +41,7 @@ export function WelcomeScreen() {
             <b>רשימת ברירת מחדל</b>
             <span>{defaultList ? `הרשימה ששמרתם: ${defaultList.items.length} פריטים ב־${defaultList.sections.length} קטגוריות.` : '5 קטגוריות ו־20 פריטים בסיסיים. אפשר לערוך ולשמור כברירת מחדל.'}</span>
           </button>}
-          <button className="choice" onClick={() => { setShop({ createdAt: new Date().toISOString(), lines: [] }); showToast('נפתחה רשימת קניות ריקה'); go('shop'); }}><b>רשימת קניות ריקה</b><span>קנייה חד־פעמית. רשימת ״מה צריך״ שלכם לא משתנה.</span></button>
+          <a className="choice" href="#/quick"><b>{quick.lines.length ? 'המשך בקנייה חד־פעמית' : 'קנייה חד־פעמית'}</b><span>{quick.lines.length ? `${quick.lines.length} פריטים ברשימה נפרדת.` : 'רשימת קניות נפרדת, בלי קשר לרשימת ״מה צריך״.'}</span></a>
           <button className="choice" onClick={() => setPaste(true)}><b>ייבוא קישור</b><span>קיבלתם רשימה? העתיקו את הקישור ולחצו כאן.</span></button>
         </div>
         {previousList && (

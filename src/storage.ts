@@ -7,6 +7,7 @@ export const KEYS = {
   ui: 'kaniyot.ui.v1',
   default: 'kaniyot.default.v1',
   previous: 'kaniyot.previous.v1',
+  quick: 'kaniyot.quick.v1',
   theme: 'kaniyot.theme.v1',
 } as const;
 
