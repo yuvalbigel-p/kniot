@@ -62,6 +62,16 @@ export const deleteSection = (s: ShouldList, id: string) =>
 export const itemsOf = (s: ShouldList, sectionId: string) => s.items.filter((i) => i.sectionId === sectionId);
 
 /** Swap two sections' positions (used by reorder mode on both screens). */
+export function moveSectionTo(s: ShouldList, id: string, toId: string): ShouldList {
+  const from = s.sections.findIndex((x) => x.id === id);
+  const to = s.sections.findIndex((x) => x.id === toId);
+  if (from < 0 || to < 0 || from === to) return s;
+  const sections = [...s.sections];
+  const [m] = sections.splice(from, 1);
+  sections.splice(to, 0, m);
+  return stamp(s, { sections });
+}
+
 export function swapSections(s: ShouldList, a: string, b: string): ShouldList {
   const i = s.sections.findIndex((x) => x.id === a);
   const j = s.sections.findIndex((x) => x.id === b);

@@ -4,7 +4,7 @@ import { go } from '../route';
 import type { IconId, Item, Section, ShouldList } from '../logic/types';
 import * as S from '../logic/should';
 import { ICONS, iconColors } from '../logic/icons';
-import { BackButton, HomeButton, IconChip, Menu, MoveButtons, Sheet, ShareIcon, Stepper, Steps, Svg, TabBar, useFocusOnMount } from '../components';
+import { BackButton, HomeButton, IconChip, Menu, DragHandle, Sheet, ShareIcon, Stepper, Steps, Svg, TabBar, useFocusOnMount } from '../components';
 import { ShareSheet } from './Share';
 
 type Sheets =
@@ -46,18 +46,16 @@ export function ShouldScreen() {
         <button role="menuitem" disabled={!defaultList} onClick={() => replaceWithUndo({ ...defaultList!, updatedAt: new Date().toISOString() }, 'נטענה ברירת המחדל')}>טעינת ברירת המחדל</button>
       </Menu>
       <div className="scroll">
-        {reorder && <p className="reorder-note">הסדר משותף לרשימת הקניות. לחצו ״סיום״ כשמסיימים.</p>}
-        {should.sections.map((sec, idx) => {
+        {reorder && <p className="reorder-note">גררו את הידית כדי לסדר. הסדר משותף לרשימת הקניות.</p>}
+        {should.sections.map((sec) => {
           const items = S.itemsOf(should, sec.id);
           return (
-            <section className="card" key={sec.id} aria-label={sec.name}>
+            <section className="card" key={sec.id} data-drag-id={sec.id} aria-label={sec.name}>
               <div className="card-head">
                 <IconChip icon={sec.icon} />
                 <span className="name">{sec.name}</span>
                 {reorder ? (
-                  <MoveButtons label={sec.name}
-                    onUp={idx > 0 ? () => edit((x) => S.swapSections(x, sec.id, should.sections[idx - 1].id)) : undefined}
-                    onDown={idx < should.sections.length - 1 ? () => edit((x) => S.swapSections(x, sec.id, should.sections[idx + 1].id)) : undefined} />
+                  <DragHandle id={sec.id} label={sec.name} onOver={(a, b) => edit((x) => S.moveSectionTo(x, a, b))} />
                 ) : (
                   <>
                     <span className="count">{items.length === 1 ? 'פריט אחד' : `${items.length} פריטים`}</span>
@@ -85,7 +83,7 @@ export function ShouldScreen() {
           <div className="empty"><h2>אין עדיין קטגוריות</h2><p>הוסיפו קטגוריה כדי להתחיל.</p></div>
         )}
         {!reorder && <button className="add-section" onClick={() => setSheet({ kind: 'section', id: null })}>+ קטגוריה חדשה</button>}
-        {!reorder && should.sections.length > 1 && <button className="add-section solid" onClick={() => setReorder(true)}>↑↓ סידור קטגוריות</button>}
+        {!reorder && should.sections.length > 1 && <button className="add-section solid" onClick={() => setReorder(true)}>סידור קטגוריות בגרירה</button>}
       </div>
       <div className="cta">
         {reorder ? <button className="btn primary block big" onClick={() => setReorder(false)}>סיום</button> :

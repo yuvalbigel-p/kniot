@@ -154,12 +154,49 @@ export const HomeButton = () => (
   </a>
 );
 
-export function MoveButtons({ onUp, onDown, label }: { onUp?: () => void; onDown?: () => void; label: string }) {
+/** Grip that drags a `[data-drag-id]` element over its siblings; calls onOver(draggedId, targetId) when it crosses a neighbour's midpoint. */
+export function DragHandle({ id, label, onOver }: { id: string; label: string; onOver: (id: string, targetId: string) => void }) {
+  const start = (e: React.PointerEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const el = (e.currentTarget.closest('[data-drag-id]') as HTMLElement);
+    const scroller = el.closest('.scroll') as HTMLElement | null;
+    el.classList.add('dragging');
+    let y = e.clientY;
+    let raf = 0;
+    const tick = () => {
+      if (scroller) {
+        const r = scroller.getBoundingClientRect();
+        if (y < r.top + 70) scroller.scrollTop -= 12;
+        else if (y > r.bottom - 70) scroller.scrollTop += 12;
+      }
+      const cur = el.getBoundingClientRect();
+      const dir = y - (cur.top + cur.height / 2);
+      for (const other of Array.from(document.querySelectorAll<HTMLElement>('[data-drag-id]'))) {
+        const oid = other.dataset.dragId!;
+        if (oid === id) continue;
+        const r = other.getBoundingClientRect();
+        const below = r.top > cur.top;
+        if (below ? y > r.top + r.height / 2 : y < r.top + r.height / 2) { if ((below && dir > 0) || (!below && dir < 0)) onOver(id, oid); break; }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    const move = (ev: PointerEvent) => { y = ev.clientY; };
+    const end = () => {
+      cancelAnimationFrame(raf);
+      el.classList.remove('dragging');
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', end);
+      window.removeEventListener('pointercancel', end);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
+    raf = requestAnimationFrame(tick);
+  };
   return (
-    <span className="move">
-      <button className="icon-btn" disabled={!onUp} onClick={onUp} aria-label={`הזזת ${label} למעלה`}><Svg size={20} sw={2.2}><path d="M6 15l6-6 6 6" /></Svg></button>
-      <button className="icon-btn" disabled={!onDown} onClick={onDown} aria-label={`הזזת ${label} למטה`}><Svg size={20} sw={2.2}><path d="M6 9l6 6 6-6" /></Svg></button>
-    </span>
+    <button className="grip" aria-label={`גרירת ${label}`} onPointerDown={start}>
+      <Svg size={22} sw={2}><path d="M5 9h14M5 15h14" /></Svg>
+    </button>
   );
 }
 

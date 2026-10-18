@@ -299,3 +299,7 @@ textarea.field { block-size: 96px; padding-block: 12px; resize: none; direction:
 .continue { display: inline-flex; align-items: center; gap: 6px; align-self: center; text-decoration: none; }
 
 .add-section.solid { border-style: solid; border-color: var(--line, currentColor); color: var(--ink); margin-block-start: 8px; }
+
+.grip { inline-size: 44px; block-size: 44px; margin-block: -6px; margin-inline-end: -8px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: none; color: var(--accent-strong); touch-action: none; cursor: grab; -webkit-user-select: none; user-select: none; }
+[data-drag-id].dragging { box-shadow: 0 8px 24px rgba(0,0,0,.22); transform: scale(1.02); position: relative; z-index: 2; }
+[data-drag-id] { transition: transform .12s; }

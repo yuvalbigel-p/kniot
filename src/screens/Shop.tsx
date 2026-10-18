@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../store';
 import { addOneOff, groupLines, progress } from '../logic/shopping';
-import { BackButton, HomeButton, IconChip, Menu, MoveButtons, Sheet, Stepper, Steps, Svg, TabBar } from '../components';
-import { addItem, checkItemName, swapSections } from '../logic/should';
+import { BackButton, HomeButton, IconChip, Menu, DragHandle, Sheet, Stepper, Steps, Svg, TabBar } from '../components';
+import { addItem, checkItemName, moveSectionTo } from '../logic/should';
 import type { ShoppingLine } from '../logic/types';
 
 export function ShopScreen() {
@@ -67,20 +67,16 @@ export function ShopScreen() {
             <a className="link-btn" href="#/check">למה יש בבית ←</a>
           </div>
         )}
-        {reorder && <p className="reorder-note">הסדר משותף לרשימת ״מה צריך״. לחצו ״סיום״ כשמסיימים.</p>}
+        {reorder && <p className="reorder-note">גררו את הידית כדי לסדר. הסדר משותף לרשימת ״מה צריך״.</p>}
         {groups.map((g) => {
-          const secGroups = groups.filter((x) => x.kind === 'section');
-          const si = secGroups.indexOf(g);
           const s = g.sectionId ? sec.get(g.sectionId) : undefined;
           return (
-            <section key={g.key} aria-label={g.title}>
+            <section key={g.key} aria-label={g.title} {...(reorder && g.sectionId ? { 'data-drag-id': g.sectionId } : {})}>
               <div className="group-head">
                 {s ? <IconChip icon={s.icon} small /> : <IconChip icon="other" small />}
                 <span>{g.title}</span>
                 {reorder && g.kind === 'section' && (
-                  <MoveButtons label={g.title}
-                    onUp={si > 0 ? () => setShould((p) => (p ? swapSections(p, g.sectionId!, secGroups[si - 1].sectionId!) : p)) : undefined}
-                    onDown={si < secGroups.length - 1 ? () => setShould((p) => (p ? swapSections(p, g.sectionId!, secGroups[si + 1].sectionId!) : p)) : undefined} />
+                  <DragHandle id={g.sectionId!} label={g.title} onOver={(a, b) => setShould((p) => (p ? moveSectionTo(p, a, b) : p))} />
                 )}
               </div>
               {!reorder && <>
