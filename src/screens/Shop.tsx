@@ -71,7 +71,7 @@ export function ShopScreen() {
         {groups.map((g) => {
           const s = g.sectionId ? sec.get(g.sectionId) : undefined;
           return (
-            <section key={g.key} aria-label={g.title} {...(reorder && g.sectionId ? { 'data-drag-id': g.sectionId } : {})}>
+            <section key={g.key} aria-label={g.title} {...(reorder && g.sectionId ? { 'data-drag-id': g.sectionId, 'data-drag-scope': 'sections' } : {})}>
               <div className="group-head">
                 {s ? <IconChip icon={s.icon} small /> : <IconChip icon="other" small />}
                 <span>{g.title}</span>

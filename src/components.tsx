@@ -155,7 +155,7 @@ export const HomeButton = () => (
 );
 
 /** Grip that drags a `[data-drag-id]` element over its siblings; calls onOver(draggedId, targetId) when it crosses a neighbour's midpoint. */
-export function DragHandle({ id, label, onOver }: { id: string; label: string; onOver: (id: string, targetId: string) => void }) {
+export function DragHandle({ id, label, scope = 'sections', onOver }: { id: string; label: string; scope?: string; onOver: (id: string, targetId: string) => void }) {
   const start = (e: React.PointerEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const el = (e.currentTarget.closest('[data-drag-id]') as HTMLElement);
@@ -171,7 +171,7 @@ export function DragHandle({ id, label, onOver }: { id: string; label: string; o
       }
       const cur = el.getBoundingClientRect();
       const dir = y - (cur.top + cur.height / 2);
-      for (const other of Array.from(document.querySelectorAll<HTMLElement>('[data-drag-id]'))) {
+      for (const other of Array.from(document.querySelectorAll<HTMLElement>(`[data-drag-scope="${scope}"]`))) {
         const oid = other.dataset.dragId!;
         if (oid === id) continue;
         const r = other.getBoundingClientRect();

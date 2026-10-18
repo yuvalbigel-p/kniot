@@ -72,6 +72,16 @@ export function moveSectionTo(s: ShouldList, id: string, toId: string): ShouldLi
   return stamp(s, { sections });
 }
 
+export function moveItemTo(s: ShouldList, id: string, toId: string): ShouldList {
+  const from = s.items.findIndex((x) => x.id === id);
+  const to = s.items.findIndex((x) => x.id === toId);
+  if (from < 0 || to < 0 || from === to || s.items[from].sectionId !== s.items[to].sectionId) return s;
+  const items = [...s.items];
+  const [m] = items.splice(from, 1);
+  items.splice(to, 0, m);
+  return stamp(s, { items });
+}
+
 export function swapSections(s: ShouldList, a: string, b: string): ShouldList {
   const i = s.sections.findIndex((x) => x.id === a);
   const j = s.sections.findIndex((x) => x.id === b);

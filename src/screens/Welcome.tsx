@@ -13,9 +13,9 @@ export function WelcomeScreen() {
   const [theme, setTheme] = useState(loadTheme);
   const [skinsOpen, setSkinsOpen] = useState(false);
 
-  const apply = (s: ShouldList, msg: string) => {
+  const apply = (s: ShouldList, msg: string, to: 'should' | 'shop' = 'should') => {
     if (should) replaceWithUndo(s, msg); else { setShould(s); showToast(msg); }
-    go('should', true);
+    go(to, true);
   };
   const fresh = (s: ShouldList): ShouldList => ({ ...s, updatedAt: new Date().toISOString() });
   const pick = (id: string) => { setTheme(applyTheme(id)); saveTheme(id); };
@@ -41,7 +41,7 @@ export function WelcomeScreen() {
             <b>רשימת ברירת מחדל</b>
             <span>{defaultList ? `הרשימה ששמרתם: ${defaultList.items.length} פריטים ב־${defaultList.sections.length} קטגוריות.` : '5 קטגוריות ו־20 פריטים בסיסיים. אפשר לערוך ולשמור כברירת מחדל.'}</span>
           </button>}
-          <button className="choice" onClick={() => apply(quickStartShould(), 'נפתחה רשימה ריקה')}><b>רשימה ריקה</b><span>קטגוריה אחת מוכנה, מתחילים להוסיף פריטים מיד.</span></button>
+          <button className="choice" onClick={() => apply(quickStartShould(), 'נפתחה רשימה ריקה', 'shop')}><b>רשימה ריקה</b><span>קופצים ישר לרשימת הקניות ומוסיפים פריטים.</span></button>
           <button className="choice" onClick={() => setPaste(true)}><b>ייבוא קישור</b><span>קיבלתם רשימה? העתיקו את הקישור ולחצו כאן.</span></button>
         </div>
         <div className="skins">
