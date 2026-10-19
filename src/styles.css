@@ -314,3 +314,10 @@ html.drag-on, html.drag-on * { -webkit-user-select: none; user-select: none; cur
 .collapse-all { display: flex; align-items: center; gap: 6px; background: none; border: 0; color: var(--accent-strong); font-size: 13.5px; font-weight: 600; padding: 4px 2px 12px; }
 
 .quick.top { padding-block: 4px 12px; }
+
+/* roomier home-check cards */
+.card { padding: 16px 18px 8px; margin-block-end: 18px; }
+.card-head { min-block-size: 48px; padding-block-end: 14px; gap: 12px; }
+.row.check { gap: 10px; padding-block: 16px 14px; }
+.row.check .bottom { gap: 10px; }
+.scroll { padding-block-end: 36px; }
