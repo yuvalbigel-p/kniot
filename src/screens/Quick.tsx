@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useStore } from '../store';
 import { addOneOff, progress } from '../logic/shopping';
 import { HomeButton, Menu, Stepper, Svg } from '../components';
@@ -8,6 +8,7 @@ export function QuickScreen() {
   const { quick, setQuick, askConfirm } = useStore();
   const [menu, setMenu] = useState(false);
   const [val, setVal] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const { done, total, ratio } = progress(quick);
 
@@ -24,6 +25,7 @@ export function QuickScreen() {
       document.getElementById(`line-${r.lineId}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }
     setVal('');
+    inputRef.current?.focus();
   };
   const clearChecked = () => setQuick((p) => ({ ...p, lines: p.lines.filter((l) => !l.checked) }));
   const clearAll = () =>
@@ -34,7 +36,7 @@ export function QuickScreen() {
       <header className="head">
         <div className="head-top">
           <div className="head-start"><span className="eyebrow">קנייה חד־פעמית</span></div>
-          <div className="head-actions"><HomeButton />
+          <div className="head-actions"><button className="text-btn" disabled={!total} onClick={clearAll}>איפוס הרשימה</button><HomeButton />
             <button className="icon-btn" aria-label="עוד פעולות" aria-haspopup="menu" onClick={() => setMenu(true)}>
               <Svg size={20}><circle cx="5" cy="12" r="1.4" fill="currentColor" /><circle cx="12" cy="12" r="1.4" fill="currentColor" /><circle cx="19" cy="12" r="1.4" fill="currentColor" /></Svg>
             </button></div>
@@ -48,8 +50,8 @@ export function QuickScreen() {
         <button role="menuitem" className="danger" disabled={!total} onClick={() => { setMenu(false); clearAll(); }}>ניקוי הרשימה</button>
       </Menu>
       <form className="quick top" onSubmit={(e) => { e.preventDefault(); add(); }}>
-        <input className="field" value={val} onChange={(e) => setVal(e.target.value)} placeholder="הוספת פריט…" aria-label="פריט חדש" />
-        <button className="add" type="submit" aria-label="הוספה">+</button>
+        <input ref={inputRef} className="field" value={val} onChange={(e) => setVal(e.target.value)} placeholder="הוספת פריט…" aria-label="פריט חדש" />
+        <button className="add" type="submit" aria-label="הוספה" onPointerDown={(e) => e.preventDefault()}>+</button>
       </form>
       <div className="scroll">
         {total === 0 && <div className="empty"><h2>הרשימה ריקה</h2><p>הוסיפו פריטים למטה. הרשימה הזו נפרדת מרשימת ״מה צריך״.</p></div>}
