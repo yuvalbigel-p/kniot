@@ -75,8 +75,8 @@ export function QuickScreen() {
             </div>
           ))}
         </section>
-        {done > 0 && <FinishButton done={done} total={total} onClick={finish} />}
       </div>
+      {done > 0 && <FinishButton done={done} total={total} onClick={finish} />}
     </div>
   );
 }

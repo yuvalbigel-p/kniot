@@ -9,7 +9,7 @@
 import { initializeApp } from 'firebase/app';
 import {
   type Firestore, collection, doc, getDoc, getDocFromServer, getDocs, initializeFirestore, limit, onSnapshot, orderBy,
-  persistentLocalCache, persistentMultipleTabManager, query, setDoc, updateDoc, writeBatch,
+  disableNetwork, enableNetwork, persistentLocalCache, persistentMultipleTabManager, query, setDoc, updateDoc, writeBatch,
 } from 'firebase/firestore';
 import type { CheckMeta, Counts, ShoppingLine, ShoppingList, ShouldList } from './logic/types';
 import { isCheckMeta, isCounts, isShouldList } from './logic/validate';
@@ -99,8 +99,12 @@ export function subscribe(hid: string, apply: Apply) {
     if (isCounts(d.counts)) apply.counts(d.counts);
     if (isCheckMeta(d.check)) apply.check(d.check);
   }, () => { docLive = false; report(); });
+  let serverSeen = false;
   const u2 = onSnapshot(linesCol(hid), { includeMetadataChanges: true }, (s) => {
     linesLive = !s.metadata.fromCache; report();
+    if (linesLive) serverSeen = true;
+    // An empty offline cache (cleared by iOS, or never filled) must not wipe the local lists.
+    if (s.empty && s.metadata.fromCache && !serverSeen) return;
     const all = s.docs.map((d) => d.data() as ShoppingLine & { list: ListName; order?: number })
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     apply.lists(all.filter((l) => l.list === 'weekly').map(strip), all.filter((l) => l.list === 'monthly').map(strip));
@@ -158,3 +162,15 @@ export async function listBackups(hid: string): Promise<Backup[]> {
 }
 
 export const ensureHousehold = (hid: string) => setDoc(hh(hid), { updatedAt: now() }, { merge: true });
+
+/** iOS freezes a backgrounded PWA and its connection can come back stale: reconnect when it returns. */
+export function reconnectOnResume() {
+  let last = Date.now();
+  const on = () => {
+    if (document.visibilityState !== 'visible') { last = Date.now(); return; }
+    if (Date.now() - last < 3000) return;
+    disableNetwork(db()).then(() => enableNetwork(db())).catch(() => {});
+  };
+  document.addEventListener('visibilitychange', on);
+  return () => document.removeEventListener('visibilitychange', on);
+}

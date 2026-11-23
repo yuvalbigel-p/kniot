@@ -103,8 +103,8 @@ export function ShopScreen() {
             </section>
           );
         })}
-        {done > 0 && <FinishButton done={done} total={total} onClick={finish} />}
       </div>
+      {done > 0 && <FinishButton done={done} total={total} onClick={finish} />}
       <form className="quick" onSubmit={(e) => { e.preventDefault(); add(); }}>
         <input className="field" value={val} onChange={(e) => setVal(e.target.value)} placeholder="הוספת פריט לפעם הזו" aria-label="הוספת פריט לפעם הזו" />
         <button className="add" type="submit" aria-label="הוספה">+</button>
@@ -171,7 +171,7 @@ function AddToShouldSheet({ line, onClose, onDone, setShould }: {
 export function FinishButton({ done, total, onClick }: { done: number; total: number; onClick: () => void }) {
   const left = total - done;
   return (
-    <div className="finish">
+    <div className="cta finish">
       <button className="btn primary block big" onClick={onClick}>
         <span className="col">סיום קנייה<small>{done} נקנו יוסרו{left ? ` · ${left} יישארו` : ''}</small></span>
         <Svg size={20}><path d="M5 12l5 5 9-10" /></Svg>

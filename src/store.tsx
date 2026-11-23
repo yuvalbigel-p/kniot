@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { CheckMeta, Counts, ShouldList, ShoppingList, Tab, UiState } from './logic/types';
 import { KEYS, consumeCorruption, load, save, useStoredState } from './storage';
 import { isCheckMeta, isCounts, isShouldList, isShoppingList, isUiState } from './logic/validate';
-import { dailyBackup, join, pusher, subscribe, type Pusher, type SyncState } from './sync';
+import { dailyBackup, join, pusher, reconnectOnResume, subscribe, type Pusher, type SyncState } from './sync';
 
 export interface ToastMsg { id: number; text: string; action?: { label: string; run: () => void } }
 export interface ConfirmReq {
@@ -106,7 +106,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       });
       setTimeout(() => { if (!cancelled) dailyBackup(hid, local()).catch(() => {}); }, 4000);
     })().catch((e) => { console.warn('[kniot] join', e); setSync('offline'); });
-    return () => { cancelled = true; pushRef.current = null; off(); };
+    const offResume = reconnectOnResume();
+    return () => { cancelled = true; pushRef.current = null; off(); offResume(); };
   }, [hid, applyShould, applyCounts, applyCheck, applyQuick, applyShop, shouldRef, countsRef, checkRef, quickRef, shopRef]);
 
   const [toast, setToast] = useState<ToastMsg | null>(null);
