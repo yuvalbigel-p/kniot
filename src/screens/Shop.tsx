@@ -90,7 +90,7 @@ export function ShopScreen() {
                     <span className="qty" dir="ltr">× {l.qty}</span>
                   </label>
                   {l.oneOff && should && should.sections.length > 0 && !should.items.some((i) => i.name.trim().toLowerCase() === l.name.trim().toLowerCase()) && (
-                    <button className="addto" onClick={() => setAddTo(l)}>+ למה צריך</button>
+                    <button className="addto" onClick={() => setAddTo(l)}>הוספה לרשימת ״מה צריך״</button>
                   )}
                   {l.oneOff && (
                     <button className="icon-btn" style={{ margin: 0 }} aria-label={`הסרת ${l.name}`} onClick={() => remove(l.id)}>
