@@ -54,7 +54,7 @@ Hard rules from the owner (don't regress):
 
 ## Photo → weekly list (AI)
 
-- `src/ai.ts` (lazy-loaded): camera button on the weekly list → image downscaled to 1600px JPEG → Firebase AI Logic, Gemini Developer API (free tier), model `gemini-3.6-flash` (temperature 0, strict transcription prompt — flash-lite hallucinated items), JSON schema `[{name, qty}]`. Hebrew prompt: always Hebrew, one item per line, quantities parsed, ignore headings/בס״ד.
+- `src/ai.ts` (lazy-loaded): camera button on the weekly list → image downscaled to 1600px JPEG → Firebase AI Logic, Gemini Developer API (free tier), model `gemini-3.5-flash` (temperature 0, strict transcription prompt, 45s timeout; flash-lite hallucinated items, 3.6-flash too slow on free tier), JSON schema `[{name, qty}]`. Hebrew prompt: always Hebrew, one item per line, quantities parsed, ignore headings/בס״ד.
 - App Check is enforced on AI Logic: web app registered with Fraud Defense (reCAPTCHA Enterprise) site key for `yuvalbigel-p.github.io`. Calls only work from the live site (not localhost/preview).
 
 ## Testing notes

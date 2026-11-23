@@ -33,7 +33,7 @@ export function QuickScreen() {
       showToast(items.length === 0 ? 'לא נמצאו פריטים בתמונה' : added ? `נוספו ${added} פריטים מהתמונה` : 'כל הפריטים כבר ברשימה');
     } catch (e) {
       console.warn('[kniot] scan', e);
-      showToast(navigator.onLine ? 'לא הצלחנו לקרוא את התמונה. נסו שוב.' : 'אין חיבור לאינטרנט');
+      showToast(!navigator.onLine ? 'אין חיבור לאינטרנט' : String(e).includes('timeout') ? 'לוקח יותר מדי זמן. נסו שוב.' : 'לא הצלחנו לקרוא את התמונה. נסו שוב.');
     } finally {
       setScanning(false);
       if (fileRef.current) fileRef.current.value = '';
@@ -98,7 +98,7 @@ export function QuickScreen() {
         {scanning && (
           <div className="scan-loading" role="status" aria-live="polite">
             <span className="spinner" aria-hidden="true" />
-            <div><b>קורא את הרשימה מהתמונה…</b><span>זה יכול לקחת עד חצי דקה</span></div>
+            <div><b>קורא את הרשימה מהתמונה…</b><span>כמה שניות…</span></div>
           </div>
         )}
         {total === 0 && !scanning && <div className="empty"><h2>הרשימה ריקה</h2><p>הוסיפו פריטים בשדה למעלה. כל מה שחסר במהלך השבוע.</p></div>}

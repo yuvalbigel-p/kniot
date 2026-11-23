@@ -4,7 +4,7 @@
 import { app } from './sync';
 
 const SITE_KEY = '6LdcES8uAAAAAKFk6fJhaqzfNjMp75SEEdg9yJ95';
-export const MODEL = 'gemini-3.6-flash';
+export const MODEL = 'gemini-3.5-flash'; // full flash: ~5s on free tier (3.6-flash ~25-60s; flash-lite invented items)
 
 const PROMPT = `זו תמונה של רשימת קניות בכתב יד, בעברית. כל שורה היא פריט נפרד.
 המשימה: תמלול מדויק בלבד.
@@ -32,7 +32,10 @@ function init() {
       },
     });
     return async (img) => {
-      const r = await model.generateContent([PROMPT, { type: 'inlineData', inlineData: img }]);
+      const r = await Promise.race([
+        model.generateContent([PROMPT, { type: 'inlineData', inlineData: img }]),
+        new Promise<never>((_, no) => setTimeout(() => no(new Error('timeout')), 45000)),
+      ]);
       const parsed: unknown = JSON.parse(r.response.text());
       if (!Array.isArray(parsed)) return [];
       return parsed
