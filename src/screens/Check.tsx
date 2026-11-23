@@ -24,7 +24,7 @@ export function CheckScreen() {
   const reset = () =>
     askConfirm({
       title: 'לנקות את הבדיקה?', body: 'כל הכמויות יחזרו ל־0. רשימת הקניות לא משתנה.', confirmLabel: 'ניקוי', destructive: true,
-      onConfirm: () => askConfirm({ title: 'בטוח?', body: 'אי אפשר לבטל את זה.', confirmLabel: 'כן, לנקות', destructive: true, onConfirm: () => { setCounts({}); setCheckMeta((m) => ({ ...m, dirty: true })); } }),
+      onConfirm: () => { setCounts({}); setCheckMeta((m) => ({ ...m, dirty: true })); },
     });
 
   return (

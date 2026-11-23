@@ -36,7 +36,7 @@ export function QuickScreen() {
     go('welcome');
   };
   const clearAll = () =>
-    askConfirm({ title: 'לנקות את כל הרשימה?', confirmLabel: 'ניקוי', destructive: true, onConfirm: () => askConfirm({ title: 'בטוח?', body: 'אי אפשר לבטל את זה.', confirmLabel: 'כן, לנקות', destructive: true, onConfirm: () => setQuick((p) => ({ ...p, lines: [] })) }) });
+    askConfirm({ title: 'לנקות את כל הרשימה?', confirmLabel: 'ניקוי', destructive: true, onConfirm: () => setQuick((p) => ({ ...p, lines: [] })) });
 
   return (
     <div className="screen">
