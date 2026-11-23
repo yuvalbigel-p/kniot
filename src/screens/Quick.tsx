@@ -14,7 +14,7 @@ export function QuickScreen() {
   const onPhoto = async (file: File | undefined) => {
     if (!file || scanning) return;
     setScanning(true);
-    showToast('קורא את הרשימה מהתמונה…');
+    showToast('קורא את הרשימה מהתמונה… זה יכול לקחת כחצי דקה');
     try {
       const { scanList } = await import('../ai');
       const items = await scanList(file);

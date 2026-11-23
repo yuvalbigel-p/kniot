@@ -4,14 +4,15 @@
 import { app } from './sync';
 
 const SITE_KEY = '6LdcES8uAAAAAKFk6fJhaqzfNjMp75SEEdg9yJ95';
-export const MODEL = 'gemini-3.5-flash-lite';
+export const MODEL = 'gemini-3.6-flash';
 
-const PROMPT = `זו תמונה של רשימת קניות בכתב יד. הרשימה תמיד בעברית.
-כל שורה בתמונה היא פריט נפרד.
-כתב היד לפעמים לא ברור: כשאות או מילה מתפרשות בכמה דרכים (למשל ל/ק, ר/ד, ו/ז), בחר במוצר המכולת או הסופר הנפוץ והסביר ביותר.
-החזר את הפריטים לפי הסדר, כל פריט כפי שנכתב (בלי מספור ובלי סימנים).
-אם בשורה כתובה כמות (למשל "2 חלב" או "חלב x2"), החזר אותה בשדה qty ואת שם הפריט בלי המספר. אחרת qty = 1.
-התעלם מכותרות, תאריכים, שורות מחוקות, וכיתובים כמו בס״ד / ב״ה / בס"ד בראש הדף - הם אינם פריטים. אם אין רשימה בתמונה, החזר רשימה ריקה.`;
+const PROMPT = `זו תמונה של רשימת קניות בכתב יד, בעברית. כל שורה היא פריט נפרד.
+המשימה: תמלול מדויק בלבד.
+- העתק כל שורה אות באות, בדיוק כפי שנכתבה. אל תנחש, אל תשלים ואל תחליף מילה במילה אחרת, גם אם נראה לך שהתכוונו למשהו אחר.
+- אל תוסיף פריטים שלא כתובים, ואל תשמיט שורות.
+- אם מספר כתוב בשורה (למשל "2 חלב" או "חלב x2"), שים אותו ב-qty והשאר את שם הפריט בלי המספר. אחרת qty = 1.
+- דלג על כיתובים כמו בס״ד / ב״ה בראש הדף, על תאריכים ועל שורות מחוקות.
+- אם אין רשימה בתמונה, החזר רשימה ריקה.`;
 
 export interface ScannedItem { name: string; qty: number }
 
@@ -25,6 +26,7 @@ function init() {
     const model = getGenerativeModel(getAI(app, { backend: new GoogleAIBackend() }), {
       model: MODEL,
       generationConfig: {
+        temperature: 0,
         responseMimeType: 'application/json',
         responseSchema: Schema.array({ items: Schema.object({ properties: { name: Schema.string(), qty: Schema.integer() } }) }),
       },
@@ -40,10 +42,10 @@ function init() {
   })());
 }
 
-/** Downscale to keep uploads small (handwriting stays legible at ~1600px). */
+/** Downscale to keep uploads small (handwriting stays legible at ~2048px). */
 async function toJpeg(file: File): Promise<{ data: string; mimeType: string }> {
   const bmp = await createImageBitmap(file);
-  const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+  const scale = Math.min(1, 2048 / Math.max(bmp.width, bmp.height));
   const c = document.createElement('canvas');
   c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
   c.getContext('2d')!.drawImage(bmp, 0, 0, c.width, c.height);
