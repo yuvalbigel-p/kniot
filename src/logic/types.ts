@@ -26,3 +26,5 @@ export interface ShoppingLine {
 export interface ShoppingList { createdAt: string; lines: ShoppingLine[] }
 export type Tab = 'should' | 'check' | 'shop';
 export interface UiState { lastTab: Tab }
+/** Home-check status: when it was last saved into the monthly list, and whether counts changed since. */
+export interface CheckMeta { savedAt: string | null; dirty: boolean }

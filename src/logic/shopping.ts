@@ -76,3 +76,28 @@ export function groupLines(list: ShoppingList, should: ShouldList): Group[] {
   if (oneOffs.length) groups.push({ key: 'oneoff', title: 'תוספות לפעם הזו', lines: oneOffs, kind: 'oneoff' });
   return groups;
 }
+
+/** Saving the home check: update the monthly list in place.
+ *  - missing item already on the list -> qty updated (checked state kept)
+ *  - missing item not on the list -> added
+ *  - item no longer missing and not yet bought -> removed
+ *  - one-offs and bought lines are untouched */
+export function mergeGaps(should: ShouldList, counts: Counts, current: ShoppingList): ShoppingList {
+  const fresh = buildLines(should, counts);
+  const byItem = new Map(fresh.map((l) => [l.itemId!, l]));
+  const kept: ShoppingLine[] = [];
+  const seen = new Set<string>();
+  for (const l of current.lines) {
+    if (l.oneOff || !l.itemId) { kept.push(l); continue; }
+    const f = byItem.get(l.itemId);
+    if (f) { kept.push({ ...l, qty: f.qty, name: f.name, sectionId: f.sectionId }); seen.add(l.itemId); }
+    else if (l.checked) kept.push(l);
+  }
+  const added = fresh.filter((l) => !seen.has(l.itemId!));
+  const oneOffs = kept.filter((l) => l.oneOff);
+  const rest = kept.filter((l) => !l.oneOff);
+  return { ...current, lines: [...rest, ...added, ...oneOffs] };
+}
+
+/** "סיום קנייה": bought (checked) lines leave the list, the rest stay for next time. */
+export const finishShop = (list: ShoppingList): ShoppingList => ({ ...list, lines: list.lines.filter((l) => !l.checked) });

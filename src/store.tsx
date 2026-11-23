@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import type { Counts, ShouldList, ShoppingList, Tab, UiState } from './logic/types';
+import type { CheckMeta, Counts, ShouldList, ShoppingList, Tab, UiState } from './logic/types';
 import { KEYS, consumeCorruption, load, save, useStoredState } from './storage';
-import { isCounts, isShouldList, isShoppingList, isUiState } from './logic/validate';
+import { isCheckMeta, isCounts, isShouldList, isShoppingList, isUiState } from './logic/validate';
 import { pruneCounts } from './logic/diff';
 
 export interface ToastMsg { id: number; text: string; action?: { label: string; run: () => void } }
@@ -24,6 +24,8 @@ interface Store {
   counts: Counts;
   setCounts: (c: Counts | ((p: Counts) => Counts)) => void;
   shop: ShoppingList;
+  checkMeta: CheckMeta;
+  setCheckMeta: (m: CheckMeta | ((p: CheckMeta) => CheckMeta)) => void;
   /** Standalone one-off shopping list (path 2); never touches the should list or `shop`. */
   quick: ShoppingList;
   setQuick: (v: ShoppingList | ((p: ShoppingList) => ShoppingList)) => void;
@@ -64,6 +66,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [counts, setCounts] = useStoredState<Counts>(KEYS.counts, () => ({}), isCounts);
   const [shop, setShop] = useStoredState<ShoppingList>(KEYS.shop, emptyShop, isShoppingList);
   const [quick, setQuick] = useStoredState<ShoppingList>(KEYS.quick, emptyShop, isShoppingList);
+  const [checkMeta, setCheckMeta] = useStoredState<CheckMeta>(KEYS.check, () => ({ savedAt: null, dirty: false }), isCheckMeta);
   const [ui, setUi] = useStoredState<UiState>(KEYS.ui, () => ({ lastTab: 'should' }), isUiState);
 
   const [toast, setToast] = useState<ToastMsg | null>(null);
@@ -103,10 +106,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [previousList, setPreviousList, setShould, setShop, showToast]);
 
   const value = useMemo<Store>(() => ({
-    should, setShould, replaceShould, replaceWithUndo, defaultList, previousList, restorePrevious, saveDefault: (l) => setDefaultList(l), counts, setCounts, shop, setShop, quick, setQuick,
+    should, setShould, replaceShould, replaceWithUndo, defaultList, previousList, restorePrevious, saveDefault: (l) => setDefaultList(l), counts, setCounts, shop, setShop, quick, setQuick, checkMeta, setCheckMeta,
     lastTab: ui.lastTab, setLastTab: (t) => setUi({ lastTab: t }),
     toast, showToast, dismissToast, confirm, askConfirm,
-  }), [should, setShould, replaceShould, replaceWithUndo, defaultList, previousList, restorePrevious, setDefaultList, counts, setCounts, shop, setShop, quick, setQuick, ui.lastTab, setUi, toast, showToast, dismissToast, confirm]);
+  }), [should, setShould, replaceShould, replaceWithUndo, defaultList, previousList, restorePrevious, setDefaultList, counts, setCounts, shop, setShop, quick, setQuick, checkMeta, setCheckMeta, ui.lastTab, setUi, toast, showToast, dismissToast, confirm]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

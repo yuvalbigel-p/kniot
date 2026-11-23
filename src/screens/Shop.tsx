@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../store';
-import { addOneOff, groupLines, progress } from '../logic/shopping';
+import { addOneOff, finishShop, groupLines, progress } from '../logic/shopping';
+import { go } from '../route';
 import { BackButton, HomeButton, IconChip, Menu, dragProps, Grip, Sheet, Stepper, Steps, Svg, TabBar } from '../components';
 import { addItem, checkItemName, moveSectionTo } from '../logic/should';
 import type { ShoppingLine } from '../logic/types';
 
 export function ShopScreen() {
-  const { should, setShould, shop, setShop, askConfirm, showToast } = useStore();
+  const { should, setShould, shop, setShop, setCounts, setCheckMeta, askConfirm, showToast } = useStore();
   const [addTo, setAddTo] = useState<ShoppingLine | null>(null);
   const [menu, setMenu] = useState(false);
   const [val, setVal] = useState('');
@@ -31,7 +32,14 @@ export function ShopScreen() {
     }
     setVal('');
   };
-  const clearChecked = () => setShop((p) => ({ ...p, lines: p.lines.filter((l) => !l.checked) }));
+  const finish = () => {
+    const left = total - done;
+    setShop((p) => finishShop(p));
+    setCounts({});
+    setCheckMeta({ savedAt: null, dirty: false });
+    showToast(left ? `הקנייה הסתיימה · ${left === 1 ? 'פריט אחד נשאר' : `${left} פריטים נשארו`} לפעם הבאה` : 'הקנייה הסתיימה');
+    go('welcome');
+  };
   const clearAll = () =>
     askConfirm({
       title: 'לנקות את כל הרשימה?', confirmLabel: 'ניקוי', destructive: true,
@@ -42,7 +50,7 @@ export function ShopScreen() {
     <div className="screen">
       <header className="head">
         <div className="head-top">
-          <div className="head-start"><BackButton to="check" label="חזרה למה יש" /><span className="eyebrow">קניות</span></div>
+          <div className="head-start"><BackButton to="welcome" label="חזרה למסך הבית" /><span className="eyebrow">חודשי · סופר</span></div>
           <div className="head-actions"><HomeButton />
           <button className="icon-btn" aria-label="עוד פעולות" aria-haspopup="menu" onClick={() => setMenu(true)}>
             <Svg size={20}><circle cx="5" cy="12" r="1.4" fill="currentColor" /><circle cx="12" cy="12" r="1.4" fill="currentColor" /><circle cx="19" cy="12" r="1.4" fill="currentColor" /></Svg>
@@ -54,7 +62,6 @@ export function ShopScreen() {
         <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done}><div style={{ inlineSize: `${ratio * 100}%` }} /></div>
       </header>
       <Menu open={menu} onClose={() => setMenu(false)}>
-        <button role="menuitem" disabled={!shop.lines.some((l) => l.checked)} onClick={clearChecked}>ניקוי מסומנים</button>
         <button role="menuitem" className="danger" disabled={!total} onClick={clearAll}>ניקוי הרשימה</button>
       </Menu>
       <div className="scroll">
@@ -96,6 +103,7 @@ export function ShopScreen() {
             </section>
           );
         })}
+        {done > 0 && <FinishButton done={done} total={total} onClick={finish} />}
       </div>
       <form className="quick" onSubmit={(e) => { e.preventDefault(); add(); }}>
         <input className="field" value={val} onChange={(e) => setVal(e.target.value)} placeholder="הוספת פריט לפעם הזו" aria-label="הוספת פריט לפעם הזו" />
@@ -157,5 +165,17 @@ function AddToShouldSheet({ line, onClose, onDone, setShould }: {
         <button className="btn" onClick={onClose}>ביטול</button>
       </div>
     </Sheet>
+  );
+}
+
+export function FinishButton({ done, total, onClick }: { done: number; total: number; onClick: () => void }) {
+  const left = total - done;
+  return (
+    <div className="finish">
+      <button className="btn primary block big" onClick={onClick}>
+        <span className="col">סיום קנייה<small>{done} נקנו יוסרו{left ? ` · ${left} יישארו` : ''}</small></span>
+        <Svg size={20}><path d="M5 12l5 5 9-10" /></Svg>
+      </button>
+    </div>
   );
 }

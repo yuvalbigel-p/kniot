@@ -9,6 +9,7 @@ export const KEYS = {
   previous: 'kaniyot.previous.v1',
   quick: 'kaniyot.quick.v1',
   theme: 'kaniyot.theme.v1',
+  check: 'kaniyot.check.v1',
 } as const;
 
 let corruptionSeen = false;

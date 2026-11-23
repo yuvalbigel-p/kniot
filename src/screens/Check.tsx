@@ -1,40 +1,38 @@
 import { useStore } from '../store';
 import { gap } from '../logic/gap';
 import { clampCount, itemsOf } from '../logic/should';
-import { countGaps, exportList, needsExportConfirm, unchecked } from '../logic/shopping';
+import { countGaps, mergeGaps } from '../logic/shopping';
 import { BackButton, HomeButton, Chevron, CollapseAll, IconChip, Stepper, Steps, useCollapsed, Svg, TabBar } from '../components';
 import { go } from '../route';
 
 export function CheckScreen() {
-  const { should, counts, setCounts, shop, setShop, askConfirm } = useStore();
+  const { should, counts, setCounts, setShop, setCheckMeta, askConfirm, showToast } = useStore();
   const { isCollapsed, toggle, setAll } = useCollapsed();
   if (!should) return null;
   const gaps = countGaps(should, counts);
 
-  const setCount = (id: string, n: number) => setCounts((c) => ({ ...c, [id]: clampCount(n) }));
-  const doExport = () => {
-    setShop(exportList(should, counts, shop));
-    go('shop');
+  const setCount = (id: string, n: number) => {
+    setCounts((c) => ({ ...c, [id]: clampCount(n) }));
+    setCheckMeta((m) => (m.dirty ? m : { ...m, dirty: true }));
   };
-  const onExport = () => {
-    if (!gaps) return;
-    if (needsExportConfirm(shop)) {
-      const n = unchecked(shop).length;
-      askConfirm({
-        title: `יש ברשימה ${n} ${n === 1 ? 'פריט' : 'פריטים'} שעוד לא נקנו. ליצור רשימה חדשה?`,
-        confirmLabel: 'רשימה חדשה', onConfirm: doExport,
-      });
-    } else doExport();
+  const save = () => {
+    setShop((p) => mergeGaps(should, counts, p));
+    setCheckMeta({ savedAt: new Date().toISOString(), dirty: false });
+    showToast(gaps ? `נשמר · ${gaps === 1 ? 'פריט אחד' : `${gaps} פריטים`} ברשימת הקניות` : 'נשמר · אין חוסרים');
+    go('welcome');
   };
   const reset = () =>
-    askConfirm({ title: 'לאפס את הספירה?', body: 'כל הכמויות יחזרו ל־0.', confirmLabel: 'איפוס', destructive: true, onConfirm: () => setCounts({}) });
+    askConfirm({
+      title: 'לנקות את הבדיקה?', body: 'כל הכמויות יחזרו ל־0. רשימת הקניות לא משתנה.', confirmLabel: 'ניקוי', destructive: true,
+      onConfirm: () => { setCounts({}); setCheckMeta((m) => ({ ...m, dirty: true })); },
+    });
 
   return (
     <div className="screen">
       <header className="head">
         <div className="head-top">
           <div className="head-start"><BackButton to="welcome" label="חזרה למסך הבית" /><span className="eyebrow">קניות</span></div>
-          <div className="head-actions"><button className="text-btn" onClick={reset}>איפוס ספירה</button><HomeButton /></div>
+          <div className="head-actions"><button className="text-btn" onClick={reset}>ניקוי</button><HomeButton /></div>
         </div>
         <h1 className="title">מה יש</h1>
         <p className="sub">סמנו כמה יש מכל פריט בבית עכשיו</p>
@@ -70,9 +68,9 @@ export function CheckScreen() {
         {should.items.length === 0 && <div className="empty"><h2>אין פריטים</h2><p>הוסיפו פריטים במסך ״מה צריך״.</p></div>}
       </div>
       <div className="cta">
-        <button className="btn primary block big" disabled={!gaps} onClick={onExport}>
-          <span className="col">{gaps ? 'לרשימת הקניות' : 'אין חוסרים'}{gaps ? <small>{gaps === 1 ? 'פריט אחד חסר' : `${gaps} פריטים חסרים`}</small> : null}</span>
-          {gaps ? <Svg size={20}><path d="M19 12H5M11 6l-6 6 6 6" /></Svg> : null}
+        <button className="btn primary block big" onClick={save}>
+          <span className="col">שמירה{<small>{gaps ? (gaps === 1 ? 'פריט אחד חסר' : `${gaps} פריטים חסרים`) : 'אין חוסרים'}</small>}</span>
+          <Svg size={20}><path d="M5 12l5 5 9-10" /></Svg>
         </button>
       </div>
       <TabBar current="check" />

@@ -8,11 +8,15 @@ Hebrew, RTL, offline-first PWA for a household: keep a fixed **should list** ("�
 - Deploy: push to `main` → GitHub Actions (`.github/workflows/deploy.yml`) → Pages, ~40s. Vite `base` is `/kniot/`.
 - Commit trailer used: `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
 
-## Product model: two completely separate paths
+## Product model: two lists + the should list
 
-1. **Weekly flow** (needs a should list): Home → **home check** (`#/check`, step 1 "מה יש") → **shopping list** (`#/shop`, step 2 "לקנייה"). Starting a check from home resets counts to 0. Shopping qty = target − have.
-2. **Should list editing** (`#/should`): NOT part of the flow. Reached from home ("עריכת רשימת מה צריך"), edit-only, "סיום" returns home. Sections (with icon) → items (name, target qty). Stepper to 0 deletes the item.
-3. **One-off list** (`#/quick`): standalone checklist with quantities, add field at top, reset button. Never touches the should list or weekly shopping list (own storage key).
+Home (`#/welcome`) is a status screen: a weekly card on top, a monthly card with two step rows, small links (edit should list, import, themes).
+
+1. **Weekly · מכולת** (`#/quick`, storage key `quick`): an ongoing list both partners add to during the week. Checkbox strikes through; **"סיום קנייה" removes only checked lines** and returns home. Never touches the should list or the monthly list.
+2. **Monthly · סופר** (needs a should list), two steps, each resumes its last state:
+   - Step 1 **home check** (`#/check`): counts autosave and mark `check.dirty`; **"שמירה"** merges gaps into the monthly list (`mergeGaps`: update qty in place, add new gaps, drop unbought lines no longer missing, keep one-offs/bought), stamps `check.savedAt`, goes home. "ניקוי" zeroes counts.
+   - Step 2 **shopping list** (`#/shop`): "סיום קנייה" removes checked lines, resets counts and `check` meta (next check starts fresh); unbought lines stay as leftovers.
+3. **Should list editing** (`#/should`): rare, reached from a small link on home. Sections → items (name, target qty). Stepper to 0 deletes the item.
 
 Hard rules from the owner (don't regress):
 - **The should list never changes unless the user explicitly edits it** (or loads default / imports / restores). Replacing it silently snapshots the old one into `previous` ("שחזור הרשימה הקודמת"). A past data-loss complaint drove this.
@@ -38,7 +42,7 @@ Hard rules from the owner (don't regress):
 
 ## Storage & sharing details
 
-- Keys: should, counts, shop (weekly list), quick (one-off), ui (lastTab), default (saved default list), previous (silent snapshot), theme. Every write goes to localStorage and is mirrored to IndexedDB; on boot, missing localStorage keys are restored from the mirror.
+- Keys: should, counts, shop (monthly list), quick (weekly list), check (home-check meta), ui (lastTab), default (saved default list), previous (silent snapshot), theme. Every write goes to localStorage and is mirrored to IndexedDB; on boot, missing localStorage keys are restored from the mirror.
 - Sharing = only the should list, as an lz-string `compressToEncodedURIComponent` payload in the hash. Decoder must tolerate `+` turned into spaces by URLSearchParams and percent-encoding (past bug). On iOS a tapped link opens in Safari, whose storage differs from the installed PWA → recipients should paste the link into "ייבוא קישור" in the installed app.
 
 ## Testing notes

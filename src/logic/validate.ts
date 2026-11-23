@@ -36,3 +36,6 @@ export function isShoppingList(v: unknown): v is ShoppingList {
 
 export const isUiState = (v: unknown): v is UiState =>
   isObj(v) && (v.lastTab === 'should' || v.lastTab === 'check' || v.lastTab === 'shop');
+
+export const isCheckMeta = (v: unknown): v is import('./types').CheckMeta =>
+  isObj(v) && (v.savedAt === null || isStr(v.savedAt)) && typeof v.dirty === 'boolean';

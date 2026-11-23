@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { gap } from './gap';
 import { starterShould, emptyShould } from './starter';
-import { addOneOff, buildLines, exportList, groupLines, progress, needsExportConfirm } from './shopping';
+import { addOneOff, buildLines, exportList, finishShop, groupLines, mergeGaps, progress, needsExportConfirm } from './shopping';
 import { decodeShould, encodeShould, extractPayload } from './share';
 import { diffShould, pruneCounts, localIsNewer } from './diff';
 import { addItem, checkItemName, deleteSection, moveSection, setTarget } from './should';
@@ -172,5 +172,35 @@ describe('should-list edits', () => {
     const d = deleteSection(s, s.sections[0].id);
     expect(d.sections).toHaveLength(4);
     expect(d.items).toHaveLength(15);
+  });
+});
+
+describe('monthly list: save check merges, finish removes bought', () => {
+  const sh = starterShould();
+  const [a, b, c] = sh.items;
+  it('updates qty in place, adds new gaps, drops items no longer missing, keeps one-offs and bought lines', () => {
+    const first = mergeGaps(sh, {}, { createdAt: 'x', lines: [{ id: 'o', name: 'סוללות', qty: 1, checked: false, oneOff: true }] });
+    expect(first.lines.filter((l) => !l.oneOff)).toHaveLength(sh.items.length);
+    const la = first.lines.find((l) => l.itemId === a.id)!;
+    const bought = first.lines.map((l) => (l.itemId === c.id ? { ...l, checked: true } : l));
+    const counts = Object.fromEntries(sh.items.map((i) => [i.id, i.target]));
+    counts[a.id] = a.target - 1; // a: still missing 1
+    counts[b.id] = b.target; // b: now enough -> removed
+    counts[c.id] = c.target; // c: enough, but already bought -> kept
+    const next = mergeGaps(sh, counts, { ...first, lines: bought });
+    const na = next.lines.find((l) => l.itemId === a.id)!;
+    expect(na.id).toBe(la.id);
+    expect(na.qty).toBe(1);
+    expect(next.lines.some((l) => l.itemId === b.id)).toBe(false);
+    expect(next.lines.find((l) => l.itemId === c.id)?.checked).toBe(true);
+    expect(next.lines.some((l) => l.name === 'סוללות')).toBe(true);
+    expect(next.lines.filter((l) => l.itemId === a.id)).toHaveLength(1);
+  });
+  it('finishShop removes only checked lines', () => {
+    const l = { createdAt: 'x', lines: [
+      { id: '1', name: 'a', qty: 1, checked: true, oneOff: true },
+      { id: '2', name: 'b', qty: 1, checked: false, oneOff: true },
+    ] };
+    expect(finishShop(l).lines.map((x) => x.id)).toEqual(['2']);
   });
 });
