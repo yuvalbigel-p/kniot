@@ -381,3 +381,33 @@ html.drag-on, html.drag-on * { -webkit-user-select: none; user-select: none; cur
 .line .chk-hit { flex: none; min-block-size: 0; display: flex; align-items: center; padding: 12px; margin-block: -12px; margin-inline-start: -12px; }
 .line button.lname { flex: 1; display: flex; align-items: center; justify-content: flex-start; background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: start; min-block-size: 48px; }
 .line .lname-edit { flex: 1 1 auto; inline-size: 100%; min-inline-size: 0; margin-inline-end: 8px; font: inherit; font-size: 16px; color: var(--ink); background: var(--card); border: var(--bw) solid var(--accent); border-radius: 10px; padding: 8px 10px; outline: none; }
+
+/* ---- home polish ---- */
+.center.home { gap: 18px; justify-content: flex-start; }
+.home-head { display: flex; align-items: center; justify-content: space-between; }
+.home-head h1 { font-family: var(--serif); font-weight: var(--title-weight); font-size: 36px; line-height: 1.1; color: var(--ink); }
+.sync-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-soft); }
+.sync-dot::before { content: ''; inline-size: 8px; block-size: 8px; border-radius: 50%; background: var(--ink-soft); }
+.sync-dot.live::before { background: var(--ok); }
+.sync-dot.offline { color: var(--warn); }
+.sync-dot.offline::before { background: var(--warn); }
+.offline-note { font-size: 12.5px; color: var(--warn); margin-block-start: -10px; }
+.home-card { border-radius: calc(var(--r-card) + 4px); padding: 16px; }
+.home-card.primary { flex-direction: row; align-items: center; justify-content: flex-start; gap: 14px; min-block-size: 84px; }
+.hc-icon { inline-size: 46px; block-size: 46px; flex-shrink: 0; border-radius: 15px; display: flex; align-items: center; justify-content: center; background: var(--accent-bg); color: var(--accent-strong); }
+.home-card.primary .hc-icon { background: rgba(255,255,255,.2); color: var(--on-accent); }
+.hc-text { flex: 1; display: flex; flex-direction: column; gap: 3px; min-inline-size: 0; }
+.hc-text b { font-size: 16.5px; }
+.hc-count { display: flex; flex-direction: column; align-items: center; line-height: 1; color: var(--on-accent); }
+.hc-count strong { font-size: 32px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.hc-count small { font-size: 11.5px; margin-block-start: 4px; color: var(--on-accent-soft); }
+.hc-title { display: flex; align-items: center; gap: 14px; }
+.hc-title b { font-size: 16.5px; font-weight: 600; }
+.hc-progress { display: flex; gap: 6px; }
+.hc-progress i { flex: 1; block-size: 6px; border-radius: 3px; background: var(--sep); }
+.hc-progress i.on { background: var(--accent); }
+.hc-progress i.half { background: linear-gradient(to left, var(--accent) 50%, var(--sep) 50%); }
+.home-card.month .step-row { border: 0; border-radius: 0; padding: 10px 2px; min-block-size: 56px; border-block-end: 1px solid var(--sep); }
+.home-card.month .step-row:last-child { border-block-end: 0; padding-block-end: 0; }
+.home-card.month { gap: 12px; }
+.step-row em { font-size: 15.5px; }
