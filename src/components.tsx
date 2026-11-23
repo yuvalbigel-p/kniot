@@ -22,9 +22,9 @@ export const ShareIcon = ({ size = 20 }: { size?: number }) => (
   <Svg size={size}><path d="M12 3v12" /><path d="M8 7l4-4 4 4" /><path d="M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6" /></Svg>
 );
 
-export function Stepper({ value, min, max = 99, onChange, label }: { value: number; min: number; max?: number; onChange: (n: number) => void; label: string }) {
+export function Stepper({ value, min, max = 99, onChange, label, compact }: { value: number; min: number; max?: number; onChange: (n: number) => void; label: string; compact?: boolean }) {
   return (
-    <div className="stepper" role="group" aria-label={label}>
+    <div className={`stepper${compact ? ' compact' : ''}`} role="group" aria-label={label}>
       <button type="button" aria-label="הפחתה" disabled={value <= min} onClick={() => onChange(value - 1)}>−</button>
       <output aria-live="polite">{value}</output>
       <button type="button" aria-label="הוספה" disabled={value >= max} onClick={() => onChange(value + 1)}>+</button>

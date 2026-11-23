@@ -411,3 +411,16 @@ html.drag-on, html.drag-on * { -webkit-user-select: none; user-select: none; cur
 .home-card.month .step-row:last-child { border-block-end: 0; padding-block-end: 0; }
 .home-card.month { gap: 12px; }
 .step-row em { font-size: 15.5px; }
+
+/* ---- list polish ---- */
+.progress { block-size: 4px; margin-block-start: 10px; }
+.list-card { background: var(--card); border: var(--bw) solid var(--line); border-radius: var(--r-card); padding-inline: 14px; box-shadow: var(--shadow-card); margin-block-end: 6px; }
+.list-card .line:last-child { border-block-end: 0; }
+.list-card .line { min-block-size: 54px; }
+.group-head { margin-block: 18px 8px; font-size: 17px; }
+.quick.top { padding-block: 4px 10px; }
+.stepper.compact { background: var(--cream); }
+.stepper.compact button { inline-size: 34px; block-size: 34px; font-size: 18px; }
+.stepper.compact output { min-inline-size: 18px; }
+.line > .icon-btn { inline-size: 36px; color: var(--ink-soft); opacity: .7; }
+.line .qty { font-size: 13px; color: var(--ink-soft); background: var(--cream); border-radius: 10px; padding: 2px 8px; font-variant-numeric: tabular-nums; }

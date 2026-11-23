@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../store';
 import { addOneOff, finishShop, groupLines, progress } from '../logic/shopping';
 import { go } from '../route';
-import { BackButton, HomeButton, IconChip, Menu, dragProps, Grip, Sheet, Stepper, Steps, Svg, TabBar } from '../components';
+import { BackButton, HomeButton, IconChip, Menu, dragProps, Grip, Sheet, Stepper, Svg, TabBar } from '../components';
 import { addItem, checkItemName, moveSectionTo } from '../logic/should';
 import type { ShoppingLine } from '../logic/types';
 
@@ -58,12 +58,15 @@ export function ShopScreen() {
         </div>
         <h1 className="title">לקנייה</h1>
         <p className="sub" aria-live="polite">{done} מתוך {total} נקנה</p>
-        <Steps step={2} />
         <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done}><div style={{ inlineSize: `${ratio * 100}%` }} /></div>
       </header>
       <Menu open={menu} onClose={() => setMenu(false)}>
         <button role="menuitem" className="danger" disabled={!total} onClick={clearAll}>ניקוי הרשימה</button>
       </Menu>
+      <form className="quick top" onSubmit={(e) => { e.preventDefault(); add(); }}>
+        <input className="field" value={val} onChange={(e) => setVal(e.target.value)} placeholder="הוספת פריט לפעם הזו" aria-label="הוספת פריט לפעם הזו" />
+        <button className="add" type="submit" aria-label="הוספה">+</button>
+      </form>
       <div className="scroll">
         {total === 0 && (
           <div className="empty">
@@ -81,7 +84,7 @@ export function ShopScreen() {
                 <span>{g.title}</span>
                 {g.sectionId && <Grip label={g.title} {...dragProps(g.sectionId, 'sections', (a, b) => setShould((p) => (p ? moveSectionTo(p, a, b) : p)))} />}
               </div>
-              <>
+              <div className="list-card">
               {g.lines.map((l) => (
                 <div id={`line-${l.id}`} className={`line${l.checked ? ' done' : ''}${flash === l.id ? ' flash' : ''}`} key={l.id}>
                   <label>
@@ -99,16 +102,12 @@ export function ShopScreen() {
                   )}
                 </div>
               ))}
-              </>
+              </div>
             </section>
           );
         })}
       </div>
       {done > 0 && <FinishButton done={done} total={total} onClick={finish} />}
-      <form className="quick" onSubmit={(e) => { e.preventDefault(); add(); }}>
-        <input className="field" value={val} onChange={(e) => setVal(e.target.value)} placeholder="הוספת פריט לפעם הזו" aria-label="הוספת פריט לפעם הזו" />
-        <button className="add" type="submit" aria-label="הוספה">+</button>
-      </form>
       <TabBar current="shop" />
       {addTo && should && (
         <AddToShouldSheet line={addTo} onClose={() => setAddTo(null)} onDone={(sectionId, itemId) => {

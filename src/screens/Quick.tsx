@@ -110,7 +110,7 @@ export function QuickScreen() {
           </div>
         )}
         {total === 0 && !scanning && <div className="empty"><h2>הרשימה ריקה</h2><p>הוסיפו פריטים בשדה למעלה. כל מה שחסר במהלך השבוע.</p></div>}
-        <section aria-label="פריטים">
+        <section className={quick.lines.length ? "list-card" : ""} aria-label="פריטים">
           {quick.lines.map((l) => (
             <div id={`line-${l.id}`} className={`line${l.checked ? ' done' : ''}${flash === l.id ? ' flash' : ''}`} key={l.id}>
               <div className="lrow">
@@ -129,7 +129,7 @@ export function QuickScreen() {
                   <button type="button" className="lname" aria-label={`עריכת ${l.name}`} onClick={() => setEditing(l.id)}>{l.name}</button>
                 )}
               </div>
-              <Stepper value={l.qty} min={1} label={`כמות ${l.name}`} onChange={(n) => setQty(l.id, n)} />
+              <Stepper compact value={l.qty} min={1} label={`כמות ${l.name}`} onChange={(n) => setQty(l.id, n)} />
               <button className="icon-btn" style={{ margin: 0 }} aria-label={`הסרת ${l.name}`} onClick={() => remove(l.id)}>
                 <Svg size={18}><path d="M6 6l12 12M18 6L6 18" /></Svg>
               </button>

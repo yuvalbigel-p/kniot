@@ -2,7 +2,7 @@ import { useStore } from '../store';
 import { gap } from '../logic/gap';
 import { clampCount, itemsOf } from '../logic/should';
 import { countGaps, mergeGaps } from '../logic/shopping';
-import { BackButton, HomeButton, Chevron, CollapseAll, IconChip, Stepper, Steps, useCollapsed, Svg, TabBar } from '../components';
+import { BackButton, HomeButton, Chevron, CollapseAll, IconChip, Stepper, useCollapsed, Svg, TabBar } from '../components';
 import { go } from '../route';
 
 export function CheckScreen() {
@@ -36,7 +36,6 @@ export function CheckScreen() {
         </div>
         <h1 className="title">מה יש</h1>
         <p className="sub">סמנו כמה יש מכל פריט בבית עכשיו</p>
-        <Steps step={1} />
       </header>
       <div className="scroll">
         <CollapseAll ids={should.sections.map((x) => x.id)} isCollapsed={isCollapsed} setAll={setAll} />
