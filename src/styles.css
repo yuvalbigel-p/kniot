@@ -424,3 +424,12 @@ html.drag-on, html.drag-on * { -webkit-user-select: none; user-select: none; cur
 .stepper.compact output { min-inline-size: 18px; }
 .line > .icon-btn { inline-size: 36px; color: var(--ink-soft); opacity: .7; }
 .line .qty { font-size: 13px; color: var(--ink-soft); background: var(--cream); border-radius: 10px; padding: 2px 8px; font-variant-numeric: tabular-nums; }
+
+/* ---- home check: one line per item ---- */
+.row.check1 { display: flex; align-items: center; gap: 10px; min-block-size: 58px; padding-block: 6px; border-block-start: 1px solid var(--sep); }
+.row.check1 .c-name { flex: 1; min-inline-size: 0; display: flex; flex-direction: column; gap: 2px; }
+.row.check1 .iname { font-size: 15.5px; }
+.row.check1 .c-sub { font-size: 12.5px; color: var(--ink-soft); }
+.c-gap { background: var(--accent-bg); color: var(--accent-strong); border: 0; border-radius: 8px; padding: 1px 7px; font: inherit; font-weight: 600; font-size: 12px; }
+.c-ok { color: var(--ok); font-weight: 600; }
+.row.check1.ok .iname { color: var(--ink-soft); }

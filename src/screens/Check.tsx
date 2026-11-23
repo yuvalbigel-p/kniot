@@ -31,7 +31,7 @@ export function CheckScreen() {
     <div className="screen">
       <header className="head">
         <div className="head-top">
-          <div className="head-start"><BackButton to="welcome" label="חזרה למסך הבית" /><span className="eyebrow">קניות</span></div>
+          <div className="head-start"><BackButton to="welcome" label="חזרה למסך הבית" /><span className="eyebrow">חודשי · סופר</span></div>
           <div className="head-actions"><button className="text-btn" onClick={reset}>ניקוי</button><HomeButton /></div>
         </div>
         <h1 className="title">מה יש</h1>
@@ -46,19 +46,14 @@ export function CheckScreen() {
               const g = gap(it, counts);
               const have = counts[it.id] ?? 0;
               return (
-                <div className="row check" key={it.id}>
-                  <div className="top">
+                <div className={`row check1${g > 0 ? '' : ' ok'}`} key={it.id}>
+                  <div className="c-name">
                     <span className="iname">{it.name}</span>
-                    {g > 0
-                      ? <button className="pill gap" aria-label={`חסר ${g}, לחיצה מסמנת שיש מספיק`} onClick={() => setCount(it.id, it.target)}>חסר {g}</button>
-                      : <span className="pill ok">מספיק</span>}
+                    <span className="c-sub">רוצים {it.target}{g > 0
+                      ? <> · <button className="c-gap" aria-label={`חסר ${g}, לחיצה מסמנת שיש מספיק`} onClick={() => setCount(it.id, it.target)}>חסר {g}</button></>
+                      : <> · <b className="c-ok">מספיק</b></>}</span>
                   </div>
-                  <div className="bottom">
-                    <span className="want">רוצים {it.target}</span>
-                    <span className="sep" aria-hidden="true">|</span>
-                    <span className="have-label">יש בבית</span>
-                    <Stepper value={have} min={0} label={`יש בבית ${it.name}`} onChange={(n) => setCount(it.id, n)} />
-                  </div>
+                  <Stepper compact value={have} min={0} label={`יש בבית ${it.name}`} onChange={(n) => setCount(it.id, n)} />
                 </div>
               );
             })}

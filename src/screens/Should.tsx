@@ -28,7 +28,7 @@ export function ShouldScreen() {
     <div className="screen">
       <header className="head">
         <div className="head-top">
-          <div className="head-start"><BackButton to="welcome" label="חזרה למסך הבית" /><span className="eyebrow">קניות</span></div>
+          <div className="head-start"><BackButton to="welcome" label="חזרה למסך הבית" /><span className="eyebrow">הבסיס הקבוע</span></div>
           <div className="head-actions">
             <HomeButton />
             <button className="icon-btn" aria-label="עוד פעולות" aria-haspopup="menu" onClick={() => setMenu(true)}>
@@ -65,7 +65,7 @@ export function ShouldScreen() {
                 <div className="row" key={it.id} data-drag-id={it.id} data-drag-scope={sec.id}>
                   <button className="rname" onClick={() => setSheet({ kind: 'item', id: it.id })}>{it.name}</button>
                   {items.length > 1 && <Grip label={it.name} {...dragProps(it.id, sec.id, (a, b) => edit((x) => S.moveItemTo(x, a, b)))} />}
-                  <Stepper value={it.target} min={0} label={`כמות רצויה ${it.name}`} onChange={(n) => (n < 1 ? (edit((s) => S.deleteItem(s, it.id)), showToast(`„${it.name}“ נמחק`)) : edit((s) => S.setTarget(s, it.id, n)))} />
+                  <Stepper compact value={it.target} min={0} label={`כמות רצויה ${it.name}`} onChange={(n) => (n < 1 ? (edit((s) => S.deleteItem(s, it.id)), showToast(`„${it.name}“ נמחק`)) : edit((s) => S.setTarget(s, it.id, n)))} />
                 </div>
               ))}
               {!open ? null : adding === sec.id ? (
