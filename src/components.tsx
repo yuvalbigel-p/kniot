@@ -271,7 +271,7 @@ export function CollapseAll({ ids, isCollapsed, setAll }: { ids: string[]; isCol
   const all = ids.every(isCollapsed);
   return (
     <button className="collapse-all" onClick={() => setAll(ids, !all)}>
-      <Svg size={18} sw={2.2}><path d={all ? 'M6 9l6 6 6-6' : 'M6 15l6-6 6 6'} /></Svg>
+      <Svg size={18} sw={2.2}><path d={all ? 'M15 6l-6 6 6 6' : 'M6 9l6 6 6-6'} /></Svg>
       {all ? 'הרחבת הכל' : 'כיווץ הכל — לסידור קטגוריות'}
     </button>
   );
