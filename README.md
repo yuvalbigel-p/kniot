@@ -17,3 +17,5 @@ npm run build
 
 הפריסה ל־GitHub Pages אוטומטית בכל push ל־`main` (`.github/workflows/deploy.yml`). `base` של Vite הוא `/kniot/`.
 האייקונים נוצרים מ־`public/icon.svg` בעזרת `node scripts/icons.mjs`.
+
+למפתחים ולסוכנים: ראו `CLAUDE.md` — מודל המוצר, כללי הבעלים, מפת הקוד ופרטי האחסון.
