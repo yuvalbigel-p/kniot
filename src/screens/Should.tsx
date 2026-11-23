@@ -1,20 +1,21 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../store';
 import { go } from '../route';
 import type { IconId, Item, Section, ShouldList } from '../logic/types';
 import * as S from '../logic/should';
 import { ICONS, iconColors } from '../logic/icons';
-import { BackButton, HomeButton, IconChip, Menu, dragProps, Chevron, CollapseAll, Grip, useCollapsed, Sheet, ShareIcon, Stepper, Svg, useFocusOnMount } from '../components';
-import { ShareSheet } from './Share';
+import { BackButton, HomeButton, IconChip, Menu, dragProps, Chevron, CollapseAll, Grip, useCollapsed, Sheet, Stepper, Svg, useFocusOnMount } from '../components';
+import { listBackups, type Backup } from '../sync';
+import { when } from '../logic/when';
 
 type Sheets =
   | { kind: 'section'; id: string | null }
   | { kind: 'item'; id: string }
-  | { kind: 'share' }
+  | { kind: 'backups' }
   | null;
 
 export function ShouldScreen() {
-  const { should, setShould, previousList, restorePrevious, defaultList, saveDefault, showToast, replaceWithUndo } = useStore();
+  const { should, setShould, showToast } = useStore();
   const [menu, setMenu] = useState(false);
   const [sheet, setSheet] = useState<Sheets>(null);
   const [adding, setAdding] = useState<string | null>(() =>
@@ -30,7 +31,6 @@ export function ShouldScreen() {
           <div className="head-start"><BackButton to="welcome" label="חזרה למסך הבית" /><span className="eyebrow">קניות</span></div>
           <div className="head-actions">
             <HomeButton />
-            <button className="icon-btn" aria-label="שיתוף הרשימה" onClick={() => setSheet({ kind: 'share' })}><ShareIcon size={18} /></button>
             <button className="icon-btn" aria-label="עוד פעולות" aria-haspopup="menu" onClick={() => setMenu(true)}>
               <Svg size={20}><circle cx="5" cy="12" r="1.4" fill="currentColor" /><circle cx="12" cy="12" r="1.4" fill="currentColor" /><circle cx="19" cy="12" r="1.4" fill="currentColor" /></Svg>
             </button>
@@ -40,9 +40,7 @@ export function ShouldScreen() {
         <p className="sub">הבסיס הקבוע שתמיד רוצים בבית. עורכים רק כשמשהו משתנה.</p>
       </header>
       <Menu open={menu} onClose={() => setMenu(false)}>
-        <button role="menuitem" onClick={() => { saveDefault(should); showToast('נשמר כרשימת ברירת המחדל'); }}>שמירה כברירת מחדל</button>
-        <button role="menuitem" disabled={!previousList} onClick={() => { setMenu(false); restorePrevious(); }}>שחזור הרשימה הקודמת</button>
-        <button role="menuitem" disabled={!defaultList} onClick={() => replaceWithUndo({ ...defaultList!, updatedAt: new Date().toISOString() }, 'נטענה ברירת המחדל')}>טעינת ברירת המחדל</button>
+        <button role="menuitem" onClick={() => setSheet({ kind: 'backups' })}>שחזור מגיבוי</button>
       </Menu>
       <div className="scroll">
         <CollapseAll ids={should.sections.map((x) => x.id)} isCollapsed={isCollapsed} setAll={setAll} />
@@ -86,7 +84,7 @@ export function ShouldScreen() {
       <div className="cta">
         <button className="btn primary block big" onClick={() => go('welcome')}>סיום</button>
       </div>
-      {sheet?.kind === 'share' && <ShareSheet onClose={() => setSheet(null)} />}
+      {sheet?.kind === 'backups' && <BackupsSheet onClose={() => setSheet(null)} />}
       {sheet?.kind === 'section' && <SectionSheet id={sheet.id} onClose={() => setSheet(null)} />}
       {sheet?.kind === 'item' && <ItemSheet id={sheet.id} onClose={() => setSheet(null)} />}
     </div>
@@ -94,7 +92,7 @@ export function ShouldScreen() {
 }
 
 function AddItemField({ sectionId, onClose }: { sectionId: string; onClose: () => void }) {
-  const { should, setShould } = useStore();
+  const { should, setShould, showToast } = useStore();
   const [val, setVal] = useState('');
   const [err, setErr] = useState('');
   const ref = useFocusOnMount<HTMLInputElement>();
@@ -250,6 +248,36 @@ function SectionSheet({ id, onClose }: { id: string | null; onClose: () => void 
         <button className="btn primary" onClick={save}>שמירה</button>
         <button className="btn" onClick={onClose}>ביטול</button>
       </div>
+    </Sheet>
+  );
+}
+
+/** Daily backups kept in the shared household; restoring replaces the should list on both phones. */
+function BackupsSheet({ onClose }: { onClose: () => void }) {
+  const { hid, setShould, askConfirm, showToast } = useStore();
+  const [list, setList] = useState<Backup[] | null>(null);
+  const [err, setErr] = useState(false);
+  useEffect(() => { if (hid) listBackups(hid).then(setList, () => setErr(true)); }, [hid]);
+  const restore = (b: Backup) => askConfirm({
+    title: `לשחזר את רשימת ״מה צריך״ מ־${when(b.at)}?`, body: `${b.should.items.length} פריטים. הרשימה הנוכחית תוחלף בשני הטלפונים.`,
+    confirmLabel: 'שחזור', destructive: true,
+    onConfirm: () => { setShould({ ...b.should, updatedAt: new Date().toISOString() }); showToast('הרשימה שוחזרה'); onClose(); },
+  });
+  return (
+    <Sheet title="שחזור מגיבוי" onClose={onClose}>
+      <p className="note">גיבוי נשמר אוטומטית פעם ביום.</p>
+      {err && <p className="err-text">אין חיבור לאינטרנט.</p>}
+      {!err && list === null && <p className="note">טוען…</p>}
+      {list && list.length === 0 && <p className="note">עוד אין גיבויים.</p>}
+      {list && list.length > 0 && (
+        <div className="stack backups">
+          {list.map((b) => (
+            <button key={b.id} className="step-row" onClick={() => restore(b)}>
+              <div><em>{when(b.at)}</em><span>{b.should.items.length} פריטים ב־{b.should.sections.length} קטגוריות</span></div>
+            </button>
+          ))}
+        </div>
+      )}
     </Sheet>
   );
 }

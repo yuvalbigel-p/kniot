@@ -17,7 +17,7 @@
     "@fontsource/secular-one": "^5.3.0",
     "@fontsource/suez-one": "^5.3.0",
     "@fontsource/varela-round": "^5.3.0",
-    "lz-string": "^1.5.0",
+    "firebase": "^13.4.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },

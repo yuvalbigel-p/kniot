@@ -2,34 +2,31 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { CheckMeta, Counts, ShouldList, ShoppingList, Tab, UiState } from './logic/types';
 import { KEYS, consumeCorruption, load, save, useStoredState } from './storage';
 import { isCheckMeta, isCounts, isShouldList, isShoppingList, isUiState } from './logic/validate';
-import { pruneCounts } from './logic/diff';
+import { dailyBackup, join, pusher, subscribe, type Pusher, type SyncState } from './sync';
 
 export interface ToastMsg { id: number; text: string; action?: { label: string; run: () => void } }
 export interface ConfirmReq {
   title: string; body?: string; confirmLabel: string; cancelLabel?: string; destructive?: boolean; onConfirm: () => void;
 }
+type Upd<T> = T | ((p: T) => T);
 
 interface Store {
+  /** Shared household id (null until the PIN was entered on this phone). */
+  hid: string | null;
+  setHid: (h: string) => void;
+  sync: SyncState;
   should: ShouldList | null;
-  setShould: (s: ShouldList | null | ((p: ShouldList | null) => ShouldList | null)) => void;
-  /** Replace the should list (import) and drop counts for items that no longer exist. */
-  replaceShould: (s: ShouldList) => void;
-  /** Replace the list with no confirm; shows a plain toast. */
-  replaceWithUndo: (s: ShouldList, msg: string) => void;
-  defaultList: ShouldList | null;
-  /** The list that was active before the last replacement, kept silently so it can be restored. */
-  previousList: ShouldList | null;
-  restorePrevious: () => void;
-  saveDefault: (s: ShouldList) => void;
+  setShould: (s: Upd<ShouldList | null>) => void;
   counts: Counts;
-  setCounts: (c: Counts | ((p: Counts) => Counts)) => void;
+  setCounts: (c: Upd<Counts>) => void;
+  /** Monthly (supermarket) list, built from the home check. */
   shop: ShoppingList;
-  checkMeta: CheckMeta;
-  setCheckMeta: (m: CheckMeta | ((p: CheckMeta) => CheckMeta)) => void;
-  /** Standalone one-off shopping list (path 2); never touches the should list or `shop`. */
+  setShop: (s: Upd<ShoppingList>) => void;
+  /** Weekly (bodega) list, shared and ongoing. */
   quick: ShoppingList;
-  setQuick: (v: ShoppingList | ((p: ShoppingList) => ShoppingList)) => void;
-  setShop: (s: ShoppingList | ((p: ShoppingList) => ShoppingList)) => void;
+  setQuick: (v: Upd<ShoppingList>) => void;
+  checkMeta: CheckMeta;
+  setCheckMeta: (m: Upd<CheckMeta>) => void;
   lastTab: Tab;
   setLastTab: (t: Tab) => void;
   toast: ToastMsg | null;
@@ -47,27 +44,70 @@ export const useStore = () => {
 };
 
 const nullable = (v: unknown): v is ShouldList | null => v === null || isShouldList(v);
+const isHid = (v: unknown): v is string | null => v === null || (typeof v === 'string' && v.length >= 24);
 const emptyShop = (): ShoppingList => ({ createdAt: new Date().toISOString(), lines: [] });
+const resolve = <T,>(next: Upd<T>, prev: T) => (typeof next === 'function' ? (next as (p: T) => T)(prev) : next);
+
+/** Local state (localStorage + IndexedDB mirror) whose user edits are also pushed to the household. */
+function useSynced<T>(key: string, fallback: () => T, valid: (v: unknown) => v is T, push: (prev: T, next: T) => void) {
+  const [value, setRaw] = useStoredState<T>(key, fallback, valid);
+  const ref = useRef(value);
+  ref.current = value;
+  const pushRef = useRef(push);
+  pushRef.current = push;
+  /** user edit: save locally + push */
+  const set = useCallback((next: Upd<T>) => {
+    const prev = ref.current;
+    const v = resolve(next, prev);
+    ref.current = v;
+    setRaw(v);
+    pushRef.current(prev, v);
+  }, [setRaw]);
+  /** remote update: save locally only */
+  const apply = useCallback((v: T) => { ref.current = v; setRaw(v); }, [setRaw]);
+  return [value, set, apply, ref] as const;
+}
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  // should-list is stored as absent (first run) or valid
-  const [should, setShouldRaw] = useState<ShouldList | null>(() => load<ShouldList | null>(KEYS.should, () => null, nullable));
-  const shouldRef = useRef(should);
-  shouldRef.current = should;
-  const setShould: Store['setShould'] = useCallback((next) => {
-    const v = typeof next === 'function' ? next(shouldRef.current) : next;
-    shouldRef.current = v;
-    save(KEYS.should, v);
-    setShouldRaw(v);
-  }, []);
+  const [hid, setHidRaw] = useState<string | null>(() => load<string | null>(KEYS.hid, () => null, isHid));
+  const [sync, setSync] = useState<SyncState>('connecting');
+  const pushRef = useRef<Pusher | null>(null);
+  const p = () => pushRef.current;
 
-  const [defaultList, setDefaultList] = useStoredState<ShouldList | null>(KEYS.default, () => null, nullable);
-  const [previousList, setPreviousList] = useStoredState<ShouldList | null>(KEYS.previous, () => null, nullable);
-  const [counts, setCounts] = useStoredState<Counts>(KEYS.counts, () => ({}), isCounts);
-  const [shop, setShop] = useStoredState<ShoppingList>(KEYS.shop, emptyShop, isShoppingList);
-  const [quick, setQuick] = useStoredState<ShoppingList>(KEYS.quick, emptyShop, isShoppingList);
-  const [checkMeta, setCheckMeta] = useStoredState<CheckMeta>(KEYS.check, () => ({ savedAt: null, dirty: false }), isCheckMeta);
+  const [should, setShould, applyShould, shouldRef] = useSynced<ShouldList | null>(KEYS.should, () => null, nullable, (_, v) => p()?.should(v));
+  const [counts, setCounts, applyCounts, countsRef] = useSynced<Counts>(KEYS.counts, () => ({}), isCounts, (_, v) => p()?.counts(v));
+  const [checkMeta, setCheckMeta, applyCheck, checkRef] = useSynced<CheckMeta>(KEYS.check, () => ({ savedAt: null, dirty: false }), isCheckMeta, (_, v) => p()?.check(v));
+  const [shop, setShop, applyShop, shopRef] = useSynced<ShoppingList>(KEYS.shop, emptyShop, isShoppingList, (a, b) => p()?.lines('monthly', a.lines, b.lines));
+  const [quick, setQuick, applyQuick, quickRef] = useSynced<ShoppingList>(KEYS.quick, emptyShop, isShoppingList, (a, b) => p()?.lines('weekly', a.lines, b.lines));
   const [ui, setUi] = useStoredState<UiState>(KEYS.ui, () => ({ lastTab: 'should' }), isUiState);
+
+  const setHid = useCallback((h: string) => { save(KEYS.hid, h); setHidRaw(h); }, []);
+
+  // connect: join once per phone, then live listeners + daily backup
+  useEffect(() => {
+    if (!hid) return;
+    let off = () => {};
+    let cancelled = false;
+    const local = () => ({ should: shouldRef.current, counts: countsRef.current, check: checkRef.current, weekly: quickRef.current, monthly: shopRef.current });
+    const joinedKey = `kaniyot.joined.${hid}`;
+    (async () => {
+      if (localStorage.getItem(joinedKey) !== '1') {
+        await join(hid, local());
+        localStorage.setItem(joinedKey, '1');
+      }
+      if (cancelled) return;
+      pushRef.current = pusher(hid);
+      off = subscribe(hid, {
+        should: applyShould, counts: applyCounts, check: applyCheck, state: setSync,
+        lists: (weekly, monthly) => {
+          applyQuick({ ...quickRef.current, lines: weekly });
+          applyShop({ ...shopRef.current, lines: monthly });
+        },
+      });
+      setTimeout(() => { if (!cancelled) dailyBackup(hid, local()).catch(() => {}); }, 4000);
+    })().catch((e) => { console.warn('[kniot] join', e); setSync('offline'); });
+    return () => { cancelled = true; pushRef.current = null; off(); };
+  }, [hid, applyShould, applyCounts, applyCheck, applyQuick, applyShop, shouldRef, countsRef, checkRef, quickRef, shopRef]);
 
   const [toast, setToast] = useState<ToastMsg | null>(null);
   const timer = useRef<number>(0);
@@ -77,39 +117,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setToast({ id: Date.now(), text, action });
     timer.current = window.setTimeout(() => setToast(null), action ? 5000 : 2800);
   }, []);
-
   const [confirm, askConfirm] = useState<ConfirmReq | null>(null);
-
   useEffect(() => { if (consumeCorruption()) showToast('שחזרנו הגדרות ברירת מחדל'); }, [showToast]);
 
-  const replaceShould = useCallback((s: ShouldList) => {
-    if (shouldRef.current && shouldRef.current.items.length) setPreviousList(shouldRef.current);
-    setShould(s);
-    setCounts((c) => pruneCounts(c, s));
-  }, [setShould, setCounts, setPreviousList]);
-
-  const countsRef = useRef(counts);
-  countsRef.current = counts;
-  const replaceWithUndo = useCallback((s: ShouldList, msg: string) => {
-    replaceShould(s);
-    setShop(emptyShop());
-    showToast(msg);
-  }, [replaceShould, setShop, showToast]);
-
-  const restorePrevious = useCallback(() => {
-    const prev = previousList;
-    if (!prev) return;
-    if (shouldRef.current && shouldRef.current.items.length) setPreviousList(shouldRef.current);
-    setShould(prev);
-    setShop(emptyShop());
-    showToast('הרשימה הקודמת שוחזרה');
-  }, [previousList, setPreviousList, setShould, setShop, showToast]);
-
   const value = useMemo<Store>(() => ({
-    should, setShould, replaceShould, replaceWithUndo, defaultList, previousList, restorePrevious, saveDefault: (l) => setDefaultList(l), counts, setCounts, shop, setShop, quick, setQuick, checkMeta, setCheckMeta,
+    hid, setHid, sync, should, setShould, counts, setCounts, shop, setShop, quick, setQuick, checkMeta, setCheckMeta,
     lastTab: ui.lastTab, setLastTab: (t) => setUi({ lastTab: t }),
     toast, showToast, dismissToast, confirm, askConfirm,
-  }), [should, setShould, replaceShould, replaceWithUndo, defaultList, previousList, restorePrevious, setDefaultList, counts, setCounts, shop, setShop, quick, setQuick, checkMeta, setCheckMeta, ui.lastTab, setUi, toast, showToast, dismissToast, confirm]);
+  }), [hid, setHid, sync, should, setShould, counts, setCounts, shop, setShop, quick, setQuick, checkMeta, setCheckMeta, ui.lastTab, setUi, toast, showToast, dismissToast, confirm]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

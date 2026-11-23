@@ -10,6 +10,7 @@ export const KEYS = {
   quick: 'kaniyot.quick.v1',
   theme: 'kaniyot.theme.v1',
   check: 'kaniyot.check.v1',
+  hid: 'kaniyot.hid.v1',
 } as const;
 
 let corruptionSeen = false;

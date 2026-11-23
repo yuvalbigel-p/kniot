@@ -344,3 +344,15 @@ html.drag-on, html.drag-on * { -webkit-user-select: none; user-select: none; cur
 .home-links { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; }
 .home-links .link-btn { display: inline-flex; align-items: center; color: var(--ink-soft); font-weight: 400; font-size: 13.5px; align-self: center; padding-block: 0; line-height: 1; }
 .finish { padding-block: 18px 6px; }
+
+/* ---- sync: PIN screen + status ---- */
+.pin { justify-content: center; }
+.pin-form { gap: 12px; }
+.pin-field { text-align: center; font-size: 28px; letter-spacing: 12px; block-size: 64px; }
+.pin-note { text-align: center; color: var(--ink-soft); font-size: 13px; }
+.sync-badge { align-self: center; font-size: 12.5px; color: var(--ink-soft); display: inline-flex; align-items: center; gap: 6px; }
+.sync-badge::before { content: ''; inline-size: 7px; block-size: 7px; border-radius: 50%; background: var(--ink-soft); }
+.sync-badge.live::before { background: var(--ok); }
+.sync-badge.offline { color: var(--warn); }
+.sync-badge.offline::before { background: var(--warn); }
+.backups { gap: 8px; }

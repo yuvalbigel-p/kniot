@@ -7,7 +7,7 @@ import { CheckScreen } from './screens/Check';
 import { ShopScreen } from './screens/Shop';
 import { QuickScreen } from './screens/Quick';
 import { WelcomeScreen } from './screens/Welcome';
-import { ImportScreen } from './screens/Share';
+import { PinScreen } from './screens/Pin';
 
 /* Launch logic: swiping the app away ends its session (sessionStorage is cleared) -> open on home.
    Switching to another app and back keeps the session alive -> stay on the same screen. */
@@ -21,15 +21,16 @@ const RESUME = (() => {
 })();
 
 function Shell() {
-  const { should, lastTab, setLastTab } = useStore();
+  const { hid, should, lastTab, setLastTab } = useStore();
   const route = useRoute();
 
   // Resolve the landing route: nothing in the hash -> last tab (or welcome on first run).
   useEffect(() => {
-    if (route.name === 'import' || route.name === 'quick') return;
+    if (!hid) return;
+    if (route.name === 'quick') return;
     if (!should) { if (route.name !== 'welcome' || !hasRoute(location.hash)) go('welcome', true); return; }
     if (!hasRoute(location.hash)) go(RESUME ? lastTab : 'welcome', true);
-  }, [route.name, should, lastTab]);
+  }, [hid, route.name, should, lastTab]);
 
   useEffect(() => {
     if (route.name === 'should' || route.name === 'check' || route.name === 'shop') {
@@ -38,7 +39,7 @@ function Shell() {
   }, [route.name, lastTab, setLastTab]);
 
   let screen;
-  if (route.name === 'import') screen = <ImportScreen />;
+  if (!hid) screen = <PinScreen />;
   else if (route.name === 'quick') screen = <QuickScreen />;
   else if (!should || route.name === 'welcome') screen = <WelcomeScreen />;
   else if (route.name === 'check') screen = <CheckScreen />;

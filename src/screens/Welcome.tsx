@@ -2,25 +2,20 @@ import { useState } from 'react';
 import { useStore } from '../store';
 import { starterShould } from '../logic/starter';
 import type { ShouldList } from '../logic/types';
-import { go, isIOSBrowser } from '../route';
+import { isIOSBrowser } from '../route';
 import { ShareIcon, Svg } from '../components';
 import { progress } from '../logic/shopping';
 import { when } from '../logic/when';
 
 const Chev = () => <Svg size={18}><path d="M15 6l-6 6 6 6" /></Svg>;
-import { PasteSheet } from './Share';
 import { THEMES, applyTheme, loadTheme, saveTheme } from '../theme';
 
 export function WelcomeScreen() {
-  const { should, quick, counts, shop, checkMeta, previousList, restorePrevious, setShould, setShop, replaceWithUndo, defaultList, showToast } = useStore();
-  const [paste, setPaste] = useState(false);
+  const { should, quick, counts, shop, checkMeta, setShould, showToast, sync } = useStore();
   const [theme, setTheme] = useState(loadTheme);
   const [skinsOpen, setSkinsOpen] = useState(false);
 
-  const apply = (s: ShouldList, msg: string) => {
-    if (should) replaceWithUndo(s, msg); else { setShould(s); setShop({ createdAt: new Date().toISOString(), lines: [] }); showToast(msg); }
-    go('welcome', true);
-  };
+  const apply = (s: ShouldList, msg: string) => { setShould(s); showToast(msg); };
   const fresh = (s: ShouldList): ShouldList => ({ ...s, updatedAt: new Date().toISOString() });
   const pick = (id: string) => { setTheme(applyTheme(id)); saveTheme(id); };
 
@@ -64,8 +59,8 @@ export function WelcomeScreen() {
                 </a>
               </>
             ) : (
-              <button className="step-row" onClick={() => apply(fresh(defaultList ?? starterShould()), 'נטענה רשימת ברירת המחדל')}>
-                <div><em>להתחלה: רשימת ״מה צריך״</em><span>{defaultList ? `הרשימה ששמרתם: ${defaultList.items.length} פריטים` : '5 קטגוריות ו־20 פריטים בסיסיים, אפשר לערוך אחר כך'}</span></div>
+              <button className="step-row" onClick={() => apply(fresh(starterShould()), 'נטענה רשימת התחלה')}>
+                <div><em>להתחלה: רשימת ״מה צריך״</em><span>5 קטגוריות ו־20 פריטים בסיסיים, אפשר לערוך אחר כך</span></div>
                 <Chev />
               </button>
             )}
@@ -73,12 +68,9 @@ export function WelcomeScreen() {
         </div>
         <div className="home-links">
           {should && <a className="link-btn" href="#/should">עריכת מה צריך</a>}
-          <button className="link-btn" onClick={() => setPaste(true)}>ייבוא קישור</button>
           <button className="link-btn" aria-expanded={skinsOpen} aria-controls="skin-grid" onClick={() => setSkinsOpen((v) => !v)}>{skinsOpen ? 'הסתרת עיצובים' : 'עיצוב'}</button>
         </div>
-        {previousList && (
-          <button className="link-btn" onClick={() => { restorePrevious(); go('should', true); }}>שחזור הרשימה הקודמת ({previousList.items.length} פריטים)</button>
-        )}
+        <div className={`sync-badge ${sync}`} role="status">{sync === 'live' ? 'מסונכרן' : sync === 'connecting' ? 'מתחבר…' : 'לא מחובר · השינויים יישמרו ויסתנכרנו'}</div>
         <div className="skins">
           {skinsOpen && (
             <div className="skin-grid" id="skin-grid">
@@ -99,7 +91,6 @@ export function WelcomeScreen() {
           <div className="hint"><ShareIcon size={18} /><span>להוספה למסך הבית: שיתוף ← הוסף למסך הבית</span></div>
         )}
       </div>
-      {paste && <PasteSheet onClose={() => setPaste(false)} />}
     </div>
   );
 }

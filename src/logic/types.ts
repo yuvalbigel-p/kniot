@@ -22,6 +22,8 @@ export interface ShoppingLine {
   itemId?: string;
   sectionId?: string;
   oneOff: boolean;
+  /** sort key in the shared list (set by sync) */
+  order?: number;
 }
 export interface ShoppingList { createdAt: string; lines: ShoppingLine[] }
 export type Tab = 'should' | 'check' | 'shop';
