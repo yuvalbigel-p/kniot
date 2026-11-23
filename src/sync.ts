@@ -103,8 +103,9 @@ export function subscribe(hid: string, apply: Apply) {
   const u2 = onSnapshot(linesCol(hid), { includeMetadataChanges: true }, (s) => {
     linesLive = !s.metadata.fromCache; report();
     if (linesLive) serverSeen = true;
-    // An empty offline cache (cleared by iOS, or never filled) must not wipe the local lists.
-    if (s.empty && s.metadata.fromCache && !serverSeen) return;
+    // Until the server has answered once this session, the offline cache may be empty or partial
+    // (cleared by iOS, never filled): keep the local lists (localStorage) instead.
+    if (s.metadata.fromCache && !serverSeen) return;
     const all = s.docs.map((d) => d.data() as ShoppingLine & { list: ListName; order?: number })
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     apply.lists(all.filter((l) => l.list === 'weekly').map(strip), all.filter((l) => l.list === 'monthly').map(strip));

@@ -47,6 +47,14 @@ export function QuickScreen() {
 
   const toggle = (id: string) => setQuick((p) => ({ ...p, lines: p.lines.map((l) => (l.id === id ? { ...l, checked: !l.checked } : l)) }));
   const setQty = (id: string, qty: number) => setQuick((p) => ({ ...p, lines: p.lines.map((l) => (l.id === id ? { ...l, qty } : l)) }));
+  const [editing, setEditing] = useState<string | null>(null);
+  const cancelEdit = useRef(false);
+  const rename = (id: string, raw: string) => {
+    const name = raw.trim().replace(/\s+/g, ' ');
+    if (!cancelEdit.current && name) setQuick((p) => ({ ...p, lines: p.lines.map((l) => (l.id === id && l.name !== name ? { ...l, name } : l)) }));
+    cancelEdit.current = false;
+    setEditing(null);
+  };
   const remove = (id: string) => setQuick((p) => ({ ...p, lines: p.lines.filter((l) => l.id !== id) }));
   const add = () => {
     const r = addOneOff(quick, val);
@@ -105,10 +113,22 @@ export function QuickScreen() {
         <section aria-label="פריטים">
           {quick.lines.map((l) => (
             <div id={`line-${l.id}`} className={`line${l.checked ? ' done' : ''}${flash === l.id ? ' flash' : ''}`} key={l.id}>
-              <label>
-                <input type="checkbox" className="chk" checked={l.checked} onChange={() => toggle(l.id)} />
-                <span className="lname">{l.name}</span>
-              </label>
+              <div className="lrow">
+                <label className="chk-hit"><input type="checkbox" className="chk" aria-label={`סימון ${l.name}`} checked={l.checked} onChange={() => toggle(l.id)} /></label>
+                {editing === l.id ? (
+                  <input
+                    className="lname-edit" defaultValue={l.name} autoFocus aria-label={`שינוי שם ${l.name}`}
+                    onFocus={(e) => e.currentTarget.select()}
+                    onBlur={(e) => rename(l.id, e.currentTarget.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') e.currentTarget.blur();
+                      if (e.key === 'Escape') { cancelEdit.current = true; e.currentTarget.blur(); }
+                    }}
+                  />
+                ) : (
+                  <button type="button" className="lname" aria-label={`עריכת ${l.name}`} onClick={() => setEditing(l.id)}>{l.name}</button>
+                )}
+              </div>
               <Stepper value={l.qty} min={1} label={`כמות ${l.name}`} onChange={(n) => setQty(l.id, n)} />
               <button className="icon-btn" style={{ margin: 0 }} aria-label={`הסרת ${l.name}`} onClick={() => remove(l.id)}>
                 <Svg size={18}><path d="M6 6l12 12M18 6L6 18" /></Svg>

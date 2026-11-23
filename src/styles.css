@@ -375,3 +375,9 @@ html.drag-on, html.drag-on * { -webkit-user-select: none; user-select: none; cur
 .line.skeleton i:first-child { inline-size: 24px; block-size: 24px; border-radius: 7px; }
 .line.skeleton i:last-child { inline-size: 40%; }
 @media (prefers-reduced-motion: reduce) { .spinner, .line.skeleton i, .quick .add.photo.busy svg { animation: none; } }
+
+/* weekly list: tap the name to edit it */
+.line .lrow { flex: 1; display: flex; align-items: center; gap: 0; min-block-size: 48px; min-inline-size: 0; }
+.line .chk-hit { flex: none; min-block-size: 0; display: flex; align-items: center; padding: 12px; margin-block: -12px; margin-inline-start: -12px; }
+.line button.lname { flex: 1; display: flex; align-items: center; justify-content: flex-start; background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: start; min-block-size: 48px; }
+.line .lname-edit { flex: 1 1 auto; inline-size: 100%; min-inline-size: 0; margin-inline-end: 8px; font: inherit; font-size: 16px; color: var(--ink); background: var(--card); border: var(--bw) solid var(--accent); border-radius: 10px; padding: 8px 10px; outline: none; }
