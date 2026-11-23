@@ -43,7 +43,7 @@ export function ShopScreen() {
   const clearAll = () =>
     askConfirm({
       title: 'לנקות את כל הרשימה?', confirmLabel: 'ניקוי', destructive: true,
-      onConfirm: () => setShop((p) => ({ ...p, lines: [] })),
+      onConfirm: () => askConfirm({ title: 'בטוח?', body: 'אי אפשר לבטל את זה.', confirmLabel: 'כן, לנקות', destructive: true, onConfirm: () => setShop((p) => ({ ...p, lines: [] })) }),
     });
 
   return (

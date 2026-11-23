@@ -356,3 +356,5 @@ html.drag-on, html.drag-on * { -webkit-user-select: none; user-select: none; cur
 .sync-badge.offline { color: var(--warn); }
 .sync-badge.offline::before { background: var(--warn); }
 .backups { gap: 8px; }
+
+.head-actions .text-btn { margin-inline-end: 18px; }
