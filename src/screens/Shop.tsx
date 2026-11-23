@@ -69,7 +69,7 @@ export function ShopScreen() {
           <div className="empty">
             <h2>הרשימה ריקה</h2>
             <p>ספרו מה יש בבית ויצאו לרשימה, או הוסיפו פריט למטה.</p>
-            <a className="link-btn" href="#/check">למה יש בבית ←</a>
+            <a className="link-btn" href="#/check">מעבר לספירת מלאי ←</a>
           </div>
         )}
         {groups.map((g) => {
