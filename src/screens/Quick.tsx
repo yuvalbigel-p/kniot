@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { nanoid } from '../logic/id';
 import { useStore } from '../store';
 import { addOneOff, finishShop, progress } from '../logic/shopping';
 import { FinishButton } from './Shop';
@@ -8,6 +9,35 @@ import { HomeButton, Menu, Stepper, Svg } from '../components';
 /** Weekly (bodega) list: an ongoing list both partners add to. Independent of the should list and the monthly list. */
 export function QuickScreen() {
   const { quick, setQuick, askConfirm, showToast } = useStore();
+  const [scanning, setScanning] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const onPhoto = async (file: File | undefined) => {
+    if (!file || scanning) return;
+    setScanning(true);
+    showToast('קורא את הרשימה מהתמונה…');
+    try {
+      const { scanList } = await import('../ai');
+      const items = await scanList(file);
+      let added = 0;
+      setQuick((p) => {
+        const lines = [...p.lines];
+        for (const it of items) {
+          const ex = lines.find((l) => l.name.trim().toLowerCase() === it.name.toLowerCase());
+          if (ex) { if (ex.checked) { ex.checked = false; added++; } continue; }
+          lines.push({ id: nanoid(8), name: it.name, qty: it.qty, checked: false, oneOff: true });
+          added++;
+        }
+        return { ...p, lines: lines.map((l) => ({ ...l })) };
+      });
+      showToast(items.length === 0 ? 'לא נמצאו פריטים בתמונה' : added ? `נוספו ${added} פריטים מהתמונה` : 'כל הפריטים כבר ברשימה');
+    } catch (e) {
+      console.warn('[kniot] scan', e);
+      showToast(navigator.onLine ? 'לא הצלחנו לקרוא את התמונה. נסו שוב.' : 'אין חיבור לאינטרנט');
+    } finally {
+      setScanning(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
   const [menu, setMenu] = useState(false);
   const [val, setVal] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -58,6 +88,10 @@ export function QuickScreen() {
       <form className="quick top" onSubmit={(e) => { e.preventDefault(); add(); }}>
         <input ref={inputRef} className="field" value={val} onChange={(e) => setVal(e.target.value)} placeholder="הוספת פריט…" aria-label="פריט חדש" />
         <button className="add" type="submit" aria-label="הוספה" onPointerDown={(e) => e.preventDefault()}>+</button>
+        <button type="button" className={`add photo${scanning ? ' busy' : ''}`} aria-label="הוספה מתמונה של רשימה" disabled={scanning} onClick={() => fileRef.current?.click()}>
+          <Svg size={22}><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></Svg>
+        </button>
+        <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => void onPhoto(e.target.files?.[0])} />
       </form>
       <div className="scroll">
         {total === 0 && <div className="empty"><h2>הרשימה ריקה</h2><p>הוסיפו פריטים בשדה למעלה. כל מה שחסר במהלך השבוע.</p></div>}

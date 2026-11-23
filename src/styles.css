@@ -358,3 +358,8 @@ html.drag-on, html.drag-on * { -webkit-user-select: none; user-select: none; cur
 .backups { gap: 8px; }
 
 .head-actions .text-btn { margin-inline-end: 18px; }
+
+/* photo -> list */
+.quick .add.photo { background: var(--card); color: var(--accent-strong); border: var(--bw) solid var(--line); display: inline-flex; align-items: center; justify-content: center; }
+.quick .add.photo.busy svg { animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .3; } }

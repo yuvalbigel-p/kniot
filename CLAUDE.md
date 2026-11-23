@@ -3,7 +3,7 @@
 Hebrew, RTL, offline-first PWA for one household (Yuval and his partner, two iPhones), synced through Firebase: keep a fixed **should list** ("מה צריך": what the home should always have), count **what's at home** ("מה יש"), and turn the gaps into a **shopping list** ("לקנייה"). No accounts: a shared PIN per phone (see Sync). Owner: Yuval (GitHub `yuvalbigel-p`). Users are Hebrew speakers on iPhones, used as a home-screen PWA. All user-facing text is Hebrew; keep it that way.
 
 - Live: https://yuvalbigel-p.github.io/kniot/  ·  Repo: https://github.com/yuvalbigel-p/kniot
-- Stack: React + Vite + TypeScript, vite-plugin-pwa, Firebase (Firestore; AI Logic planned), vitest. No router/state library.
+- Stack: React + Vite + TypeScript, vite-plugin-pwa, Firebase (Firestore + AI Logic), vitest. No router/state library.
 - Firebase project `kniot-e1108` (Spark/free plan, owner Yuval's Google account). Firestore in me-west1 (Tel Aviv).
 - Commands: `npm run dev`, `npm test` (vitest, pure logic only), `npm run build` (tsc + vite). Icons regenerate from `public/icon.svg` via `node scripts/icons.mjs`.
 - Deploy: push to `main` → GitHub Actions (`.github/workflows/deploy.yml`) → Pages, ~40s. Vite `base` is `/kniot/`.
@@ -51,6 +51,11 @@ Hard rules from the owner (don't regress):
 - Removed on purpose (owner: "there will be no import, the same list lives on the server"): share links/import, default list, previous-list snapshot.
 - Can't reach Firestore from the Claude cloud container or the Cowork VM (egress blocked); test against the live site in the desktop built-in browser.
 - Package changes were installed from Linux: run `npm install` on the Mac before `npm run dev`.
+
+## Photo → weekly list (AI)
+
+- `src/ai.ts` (lazy-loaded): camera button on the weekly list → image downscaled to 1600px JPEG → Firebase AI Logic, Gemini Developer API (free tier), model `gemini-3.5-flash-lite`, JSON schema `[{name, qty}]`. Hebrew prompt: always Hebrew, one item per line, quantities parsed, ignore headings/בס״ד.
+- App Check is enforced on AI Logic: web app registered with Fraud Defense (reCAPTCHA Enterprise) site key for `yuvalbigel-p.github.io`. Calls only work from the live site (not localhost/preview).
 
 ## Testing notes
 
