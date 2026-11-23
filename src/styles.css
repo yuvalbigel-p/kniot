@@ -363,3 +363,15 @@ html.drag-on, html.drag-on * { -webkit-user-select: none; user-select: none; cur
 .quick .add.photo { background: var(--card); color: var(--accent-strong); border: var(--bw) solid var(--line); display: inline-flex; align-items: center; justify-content: center; }
 .quick .add.photo.busy svg { animation: pulse 1s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: .3; } }
+
+.scan-loading { display: flex; align-items: center; gap: 14px; padding: 14px 16px; margin-block: 4px 8px; background: var(--accent-bg); color: var(--accent-strong); border-radius: var(--r-card); }
+.scan-loading div { display: flex; flex-direction: column; gap: 2px; }
+.scan-loading b { font-weight: 600; }
+.scan-loading span:not(.spinner) { font-size: 12.5px; opacity: .8; }
+.spinner { inline-size: 22px; block-size: 22px; flex-shrink: 0; border-radius: 50%; border: 3px solid currentColor; border-block-start-color: transparent; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.line.skeleton { display: flex; align-items: center; gap: 12px; min-block-size: 56px; }
+.line.skeleton i { display: block; block-size: 14px; border-radius: 7px; background: var(--line); animation: pulse 1.2s ease-in-out infinite; }
+.line.skeleton i:first-child { inline-size: 24px; block-size: 24px; border-radius: 7px; }
+.line.skeleton i:last-child { inline-size: 40%; }
+@media (prefers-reduced-motion: reduce) { .spinner, .line.skeleton i, .quick .add.photo.busy svg { animation: none; } }

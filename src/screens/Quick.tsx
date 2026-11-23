@@ -14,20 +14,21 @@ export function QuickScreen() {
   const onPhoto = async (file: File | undefined) => {
     if (!file || scanning) return;
     setScanning(true);
-    showToast('קורא את הרשימה מהתמונה… זה יכול לקחת כחצי דקה');
     try {
       const { scanList } = await import('../ai');
       const items = await scanList(file);
       let added = 0;
       setQuick((p) => {
-        const lines = [...p.lines];
+        const key = (n: string) => n.trim().replace(/\s+/g, ' ').toLowerCase();
+        const lines = p.lines.map((l) => ({ ...l }));
         for (const it of items) {
-          const ex = lines.find((l) => l.name.trim().toLowerCase() === it.name.toLowerCase());
+          const ex = lines.find((l) => key(l.name) === key(it.name));
           if (ex) { if (ex.checked) { ex.checked = false; added++; } continue; }
-          lines.push({ id: nanoid(8), name: it.name, qty: it.qty, checked: false, oneOff: true });
+          lines.push({ id: nanoid(8), name: it.name.trim(), qty: it.qty, checked: false, oneOff: true });
           added++;
         }
-        return { ...p, lines: lines.map((l) => ({ ...l })) };
+        const seen = new Set<string>();
+        return { ...p, lines: lines.filter((l) => { const k = key(l.name); if (seen.has(k)) return false; seen.add(k); return true; }) };
       });
       showToast(items.length === 0 ? 'לא נמצאו פריטים בתמונה' : added ? `נוספו ${added} פריטים מהתמונה` : 'כל הפריטים כבר ברשימה');
     } catch (e) {
@@ -94,7 +95,13 @@ export function QuickScreen() {
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => void onPhoto(e.target.files?.[0])} />
       </form>
       <div className="scroll">
-        {total === 0 && <div className="empty"><h2>הרשימה ריקה</h2><p>הוסיפו פריטים בשדה למעלה. כל מה שחסר במהלך השבוע.</p></div>}
+        {scanning && (
+          <div className="scan-loading" role="status" aria-live="polite">
+            <span className="spinner" aria-hidden="true" />
+            <div><b>קורא את הרשימה מהתמונה…</b><span>זה יכול לקחת עד חצי דקה</span></div>
+          </div>
+        )}
+        {total === 0 && !scanning && <div className="empty"><h2>הרשימה ריקה</h2><p>הוסיפו פריטים בשדה למעלה. כל מה שחסר במהלך השבוע.</p></div>}
         <section aria-label="פריטים">
           {quick.lines.map((l) => (
             <div id={`line-${l.id}`} className={`line${l.checked ? ' done' : ''}${flash === l.id ? ' flash' : ''}`} key={l.id}>
@@ -109,6 +116,7 @@ export function QuickScreen() {
             </div>
           ))}
         </section>
+        {scanning && [0, 1, 2].map((i) => <div key={i} className="line skeleton" aria-hidden="true"><i /><i /></div>)}
       </div>
       {done > 0 && <FinishButton done={done} total={total} onClick={finish} />}
     </div>
