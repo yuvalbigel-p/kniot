@@ -43,7 +43,7 @@ export function QuickScreen() {
       <header className="head">
         <div className="head-top">
           <div className="head-start"><span className="eyebrow">שבועי · מכולת</span></div>
-          <div className="head-actions"><HomeButton />
+          <div className="head-actions"><button className="text-btn" disabled={!total} onClick={clearAll}>ניקוי</button><HomeButton />
             <button className="icon-btn" aria-label="עוד פעולות" aria-haspopup="menu" onClick={() => setMenu(true)}>
               <Svg size={20}><circle cx="5" cy="12" r="1.4" fill="currentColor" /><circle cx="12" cy="12" r="1.4" fill="currentColor" /><circle cx="19" cy="12" r="1.4" fill="currentColor" /></Svg>
             </button></div>
